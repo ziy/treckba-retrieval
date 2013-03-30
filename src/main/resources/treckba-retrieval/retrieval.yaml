@@ -1,0 +1,25 @@
+configuration: 
+  name: treckba-retrieval
+  author: ziy
+
+persistence-provider:
+  inherit: treckba-retrieval.persistence.local-persistence-provider
+
+collection-reader:
+  inherit: treckba-retrieval.collection.treckba-topic-collection-reader
+
+pipeline:
+#  - inherit: ecd.phase
+#    name: retrieval
+#    options: |
+#      - inherit: treckba-retrieval.filter.google-distance-expanded-keyterms
+
+  - inherit: treckba-retrieval.eval.retrieval-trace-evaluator-aggregator
+    relevance-level: RELEVANCE
+
+post-process:
+  - inherit: jdbc.eval.retrieval-evaluator-consumer
+
+  - inherit: report.csv-report-generator
+    builders: |
+      - inherit: jdbc.report.f-measure-report-component

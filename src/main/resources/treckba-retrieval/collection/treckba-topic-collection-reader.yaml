@@ -1,0 +1,9 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.collection.TrecKbaTopicCollectionReader
+dataset: TRECKBA12
+input: /input/trec-kba-ccr-2012.filter-topics.json
+
+decorators: |
+  - inherit: treckba-retrieval.collection.retrieval-gs-decorator
+
+persistence-provider: |
+  inherit: treckba-retrieval.persistence.local-persistence-provider

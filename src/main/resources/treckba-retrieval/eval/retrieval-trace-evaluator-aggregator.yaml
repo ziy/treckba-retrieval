@@ -1,0 +1,5 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.eval.RetrievalTraceEvaluatorAggregator
+name: trace-evaluator-aggregator
+
+aggregators: |
+  - inherit: jdbc.eval.retrieval-aggregator
