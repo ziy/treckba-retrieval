@@ -10,7 +10,9 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.oaqa.model.Passage;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
@@ -22,7 +24,6 @@ import edu.cmu.cs.ziy.courses.expir.treckba.view.TrecKbaViewType;
 import edu.cmu.lti.oaqa.framework.CasUtils;
 import edu.cmu.lti.oaqa.framework.ViewManager;
 import edu.cmu.lti.oaqa.framework.types.InputElement;
-import edu.cmu.lti.oaqa.framework.types.OutputElement;
 
 public class RetrievalGoldStandardDecorator extends JCasAnnotator_ImplBase {
 
@@ -70,18 +71,26 @@ public class RetrievalGoldStandardDecorator extends JCasAnnotator_ImplBase {
     }
     InputElement input = (InputElement) CasUtils.getFirst(jcas, InputElement.class.getName());
     String topic = input.getQuestion();
-    for (String streamId : topic2relevant.get(topic)) {
-      OutputElement output = new OutputElement(gsRelevantView);
-      output.setSequenceId(topic);
-      output.setAnswer(streamId);
-      output.addToIndexes(gsRelevantView);
-    }
-    for (String streamId : topic2central.get(topic)) {
-      OutputElement output = new OutputElement(gsCentralView);
-      output.setSequenceId(topic);
-      output.setAnswer(streamId);
-      output.addToIndexes(gsCentralView);
-    }
+    Collections2.transform(topic2relevant.get(topic), new IdToPassageFunction(gsRelevantView));
+    Collections2.transform(topic2relevant.get(topic), new IdToPassageFunction(gsCentralView));
+  }
+
+}
+
+class IdToPassageFunction implements Function<String, Void> {
+
+  private JCas view;
+
+  public IdToPassageFunction(JCas view) {
+    this.view = view;
+  }
+
+  @Override
+  public Void apply(String streamId) {
+    Passage output = new Passage(view);
+    output.setDocId(streamId);
+    output.addToIndexes(view);
+    return null;
   }
 
 }

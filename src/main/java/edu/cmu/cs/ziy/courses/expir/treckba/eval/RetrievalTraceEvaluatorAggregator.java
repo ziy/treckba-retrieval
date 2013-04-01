@@ -1,12 +1,10 @@
 package edu.cmu.cs.ziy.courses.expir.treckba.eval;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.uima.UimaContext;
 import org.apache.uima.cas.CASException;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.ResourceInitializationException;
 
 import com.google.common.base.Function;
@@ -17,10 +15,11 @@ import com.google.common.collect.Ordering;
 import edu.cmu.cs.ziy.courses.expir.treckba.view.TrecKbaViewType;
 import edu.cmu.lti.oaqa.framework.ViewManager;
 import edu.cmu.lti.oaqa.framework.ViewManager.ViewType;
+import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
+import edu.cmu.lti.oaqa.framework.data.RetrievalResultArray;
 import edu.cmu.lti.oaqa.framework.eval.retrieval.RetrievalEvalConsumer;
-import edu.cmu.lti.oaqa.framework.types.OutputElement;
 
-public class RetrievalTraceEvaluatorAggregator extends RetrievalEvalConsumer<OutputElement> {
+public class RetrievalTraceEvaluatorAggregator extends RetrievalEvalConsumer<RetrievalResult> {
 
   private static final String RELEVANCE_LEVEL_PROPERTY = "treckba-retrieval.eval.relevance-level";
 
@@ -34,57 +33,57 @@ public class RetrievalTraceEvaluatorAggregator extends RetrievalEvalConsumer<Out
   }
 
   @Override
-  protected Ordering<OutputElement> getOrdering() {
-    return new Ordering<OutputElement>() {
+  protected Ordering<RetrievalResult> getOrdering() {
+    return new Ordering<RetrievalResult>() {
 
       @Override
-      public int compare(OutputElement left, OutputElement right) {
-        return left.getAnswer().compareTo(right.getAnswer());
+      public int compare(RetrievalResult left, RetrievalResult right) {
+        return left.getDocID().compareTo(right.getDocID());
       }
 
     }.reverse();
   }
 
   @Override
-  protected Function<OutputElement, String> getToIdStringFct() {
-    return new Function<OutputElement, String>() {
+  protected Function<RetrievalResult, String> getToIdStringFct() {
+    return new Function<RetrievalResult, String>() {
 
       @Override
-      public String apply(OutputElement input) {
-        return input.getAnswer();
+      public String apply(RetrievalResult input) {
+        return input.getDocID();
       }
     };
   }
 
   @Override
-  protected List<OutputElement> getGoldStandard(JCas jcas) throws CASException {
+  protected List<RetrievalResult> getGoldStandard(JCas jcas) throws CASException {
     if (relevanceLevel.equalsIgnoreCase("RELEVANCE")) {
-      return getAnnotations(
-              ViewManager.getOrCreateView(jcas, TrecKbaViewType.DOCUMENT_GS_RELEVANT),
-              OutputElement.type);
+      try {
+        return RetrievalResultArray.retrieveRetrievalResults(ViewManager.getOrCreateView(jcas,
+                TrecKbaViewType.DOCUMENT_GS_RELEVANT));
+      } catch (Exception e) {
+        throw new CASException(e);
+      }
     } else if (relevanceLevel.equalsIgnoreCase("CENTRAL")) {
-      return getAnnotations(ViewManager.getOrCreateView(jcas, TrecKbaViewType.DOCUMENT_GS_CENTRAL),
-              OutputElement.type);
+      try {
+        return RetrievalResultArray.retrieveRetrievalResults(ViewManager.getOrCreateView(jcas,
+                TrecKbaViewType.DOCUMENT_GS_CENTRAL));
+      } catch (Exception e) {
+        throw new CASException(e);
+      }
     } else {
       return Lists.newArrayList();
     }
   }
 
   @Override
-  protected List<OutputElement> getResults(JCas jcas) throws CASException {
-    return getAnnotations(ViewManager.getOrCreateView(jcas, ViewType.DOCUMENT), OutputElement.type);
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T extends Annotation> List<T> getAnnotations(JCas jcas, int type) {
-    List<T> annotations = new ArrayList<T>();
-    for (Annotation annotation : jcas.getAnnotationIndex(type)) {
-      if (annotation.getTypeIndexID() != type) {
-        continue;
-      }
-      annotations.add((T) annotation);
+  protected List<RetrievalResult> getResults(JCas jcas) throws CASException {
+    try {
+      return RetrievalResultArray.retrieveRetrievalResults(ViewManager.getOrCreateView(jcas,
+              ViewType.DOCUMENT));
+    } catch (Exception e) {
+      throw new CASException(e);
     }
-    return annotations;
   }
 
 }
