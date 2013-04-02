@@ -1,0 +1,4 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.keyterm.SimpleKeytermExtractor
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider
