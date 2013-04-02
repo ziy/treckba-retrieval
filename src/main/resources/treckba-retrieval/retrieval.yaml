@@ -7,12 +7,19 @@ persistence-provider:
 
 collection-reader:
   inherit: treckba-retrieval.collection.treckba-topic-collection-reader
+  decorators: |
+    - inherit: treckba-retrieval.collection.retrieval-gs-decorator
 
 pipeline:
-#  - inherit: ecd.phase
-#    name: retrieval
-#    options: |
-#      - inherit: treckba-retrieval.filter.google-distance-expanded-keyterms
+  - inherit: ecd.phase
+    name: keyterm-expansion
+    options: |
+      - inherit: treckba-retrieval.keyterm.simple
+
+  - inherit: ecd.phase
+    name: retrieval-strategist
+    options: |
+      - inherit: treckba-retrieval.retrieval.simple
 
   - inherit: treckba-retrieval.eval.retrieval-trace-evaluator-aggregator
     relevance-level: RELEVANCE
