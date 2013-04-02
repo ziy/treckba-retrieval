@@ -8,7 +8,7 @@ persistence-provider:
 collection-reader:
   inherit: treckba-retrieval.collection.treckba-topic-collection-reader
   decorators: |
-    - inherit: treckba-retrieval.collection.retrieval-test-gs-decorator
+    - inherit: treckba-retrieval.collection.retrieval-gs-decorator-test
 
 pipeline:
   - inherit: ecd.phase
@@ -19,7 +19,7 @@ pipeline:
   - inherit: ecd.phase
     name: retrieval-strategist
     options: |
-      - inherit: treckba-retrieval.retrieval.simple
+      - inherit: treckba-retrieval.retrieval.simple-test
 
   - inherit: treckba-retrieval.eval.retrieval-trace-evaluator-aggregator
     relevance-level: RELEVANCE

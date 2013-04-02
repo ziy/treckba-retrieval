@@ -2,6 +2,7 @@ package edu.cmu.cs.ziy.courses.expir.treckba.collection;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.uima.UimaContext;
@@ -14,11 +15,15 @@ import org.apache.uima.resource.ResourceInitializationException;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.io.Resources;
+import com.google.common.primitives.Ints;
 
 import edu.cmu.cs.ziy.courses.expir.treckba.view.TrecKbaViewType;
 import edu.cmu.lti.oaqa.framework.CasUtils;
@@ -30,6 +35,10 @@ import edu.cmu.lti.oaqa.framework.types.InputElement;
 public class RetrievalGoldStandardDecorator extends JCasAnnotator_ImplBase {
 
   private static final String GSPATH_PROPERTY = "treckba-retrieval.collection.gspath";
+
+  private static final String START_PROPERTY = "treckba-retrieval.collection.start";
+
+  private static final String END_PROPERTY = "treckba-retrieval.collection.end";
 
   private ListMultimap<String, String> topic2relevant = ArrayListMultimap.create();
 
@@ -47,10 +56,23 @@ public class RetrievalGoldStandardDecorator extends JCasAnnotator_ImplBase {
     } catch (IOException e) {
       throw new ResourceInitializationException(e);
     }
+    int start = Iterables.find(Arrays.asList(
+            Ints.tryParse(Strings.nullToEmpty(System.getProperty(START_PROPERTY))),
+            (Integer) context.getConfigParameterValue("start"), Integer.MIN_VALUE), Predicates
+            .notNull());
+    int end = Iterables.find(Arrays.asList(
+            Ints.tryParse(Strings.nullToEmpty(System.getProperty(END_PROPERTY))),
+            (Integer) context.getConfigParameterValue("end"), Integer.MAX_VALUE), Predicates
+            .notNull());
+    Range<Integer> validRange = Range.closedOpen(start, end);
     for (String line : Collections2.filter(lines, Predicates.containsPattern("^[^#]"))) {
       String[] segs = line.split("\t");
       String topic = segs[3];
       String streamId = segs[2];
+      int time = Integer.parseInt(streamId.split("-", 2)[0]);
+      if (!validRange.contains(time)) {
+        continue;
+      }
       String relevanceLevel = segs[5];
       if (relevanceLevel.equals("1")) {
         topic2relevant.put(topic, streamId);
