@@ -8,7 +8,7 @@ persistence-provider:
 collection-reader:
   inherit: treckba-retrieval.collection.treckba-topic-collection-reader
   decorators: |
-    - inherit: treckba-retrieval.collection.retrieval-gs-decorator
+    - inherit: treckba-retrieval.collection.retrieval-test-gs-decorator
 
 pipeline:
   - inherit: ecd.phase

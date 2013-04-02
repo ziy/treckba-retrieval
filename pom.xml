@@ -85,7 +85,7 @@
         <configuration>
           <mainClass>edu.cmu.lti.oaqa.ecd.driver.ECDDriver</mainClass>
           <arguments>
-            <argument>treckba-retrieval.retrieval</argument>
+            <argument>treckba-retrieval.retrieval-test</argument>
           </arguments>
         </configuration>
       </plugin>
