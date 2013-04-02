@@ -74,23 +74,23 @@ public class RetrievalGoldStandardDecorator extends JCasAnnotator_ImplBase {
     Collections2.transform(topic2relevant.get(topic), new IdToPassageFunction(gsRelevantView));
     Collections2.transform(topic2relevant.get(topic), new IdToPassageFunction(gsCentralView));
   }
+  
+  public static class IdToPassageFunction implements Function<String, Void> {
+    
+    private JCas view;
+    
+    public IdToPassageFunction(JCas view) {
+      this.view = view;
+    }
+    
+    @Override
+    public Void apply(String streamId) {
+      Passage output = new Passage(view);
+      output.setDocId(streamId);
+      output.addToIndexes(view);
+      return null;
+    }
 
 }
-
-class IdToPassageFunction implements Function<String, Void> {
-
-  private JCas view;
-
-  public IdToPassageFunction(JCas view) {
-    this.view = view;
-  }
-
-  @Override
-  public Void apply(String streamId) {
-    Passage output = new Passage(view);
-    output.setDocId(streamId);
-    output.addToIndexes(view);
-    return null;
-  }
 
 }
