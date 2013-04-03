@@ -1,3 +1,4 @@
 class: edu.cmu.cs.ziy.courses.expir.treckba.collection.RetrievalGoldStandardDecorator
 gspath: /gs/trec-kba-ccr-2012-judgments-2012JUN22-final.filter-run.txt
-start: 1325376000
+start: 1325376000 # 2012-01-01-00
+end: 1325383200 # 2012-01-01-02
