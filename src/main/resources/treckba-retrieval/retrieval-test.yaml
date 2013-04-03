@@ -21,6 +21,17 @@ pipeline:
     options: |
       - inherit: treckba-retrieval.retrieval.simple-test
 
+  - inherit: ecd.phase
+    name: rescale
+    options: |
+      - inherit: treckba-retrieval.rescale.minmax
+#      - inherit: treckba-retrieval.rescale.constant
+
+  - inherit: ecd.phase
+    name: filter
+    options: |
+      - inherit: treckba-retrieval.filter.threshold
+
   - inherit: treckba-retrieval.eval.retrieval-trace-evaluator-aggregator
     relevance-level: RELEVANCE
 

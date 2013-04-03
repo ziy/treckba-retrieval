@@ -1,0 +1,8 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.rescale.ConstantRescaler
+min: 0.0
+max: 1000.0
+lowerbound: 0.0
+upperbound: 1.0
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider
