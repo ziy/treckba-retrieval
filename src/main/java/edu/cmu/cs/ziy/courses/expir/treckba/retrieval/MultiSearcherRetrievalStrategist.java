@@ -31,7 +31,7 @@ import edu.cmu.lti.oaqa.cse.basephase.retrieval.AbstractRetrievalStrategist;
 import edu.cmu.lti.oaqa.framework.data.Keyterm;
 import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
 
-public class SimpleRetrievalStrategist extends AbstractRetrievalStrategist {
+public class MultiSearcherRetrievalStrategist extends AbstractRetrievalStrategist {
 
   private static final String QUOTE_PROPERTY = "treckba-retrieval.retrieval.quote";
 
@@ -70,7 +70,11 @@ public class SimpleRetrievalStrategist extends AbstractRetrievalStrategist {
     IndexReader[] indexReaders = FluentIterable.from(indexDirs)
             .transform(new IndexReaderOpener(indexRoot)).filter(Predicates.notNull())
             .toArray(IndexReader.class);
-    log("Index count: " + indexRoot.length());
+    log("Index count: " + indexReaders.length);
+    createSearcher(indexReaders);
+  }
+
+  protected void createSearcher(IndexReader[] indexReaders) {
     MultiReader reader = new MultiReader(indexReaders, true);
     searcher = new IndexSearcher(reader);
   }
@@ -84,11 +88,11 @@ public class SimpleRetrievalStrategist extends AbstractRetrievalStrategist {
     return results;
   }
 
-  private String generateQuery(List<Keyterm> keyterms) {
+  protected String generateQuery(List<Keyterm> keyterms) {
     return Joiner.on(' ').join(Lists.transform(keyterms, new KeytermStringGetter(quote)));
   }
 
-  private List<RetrievalResult> retrieveDocuments(String query) {
+  protected List<RetrievalResult> retrieveDocuments(String query) {
     ScoreDoc[] hits;
     List<RetrievalResult> results = Lists.newArrayList();
     try {
@@ -138,8 +142,11 @@ public class SimpleRetrievalStrategist extends AbstractRetrievalStrategist {
     public IndexReader apply(String input) {
       File dir = new File(indexRoot, input);
       try {
-        return DirectoryReader.open(FSDirectory.open(dir));
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(dir));
+        System.out.println("[index]" + dir.getName() + " open successfully.");
+        return reader;
       } catch (IOException e) {
+        System.out.println("[index]" + dir.getName() + " open unsuccessfully.");
         return null;
       }
     }

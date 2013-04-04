@@ -1,7 +1,8 @@
-class: edu.cmu.cs.ziy.courses.expir.treckba.retrieval.SimpleRetrievalStrategist
-quote: false
+class: edu.cmu.cs.ziy.courses.expir.treckba.retrieval.IndividualSearcherRetrievalStrategist
 dirs-file: ../treckba-corpus/corpus/dir-list-test.txt
 index-root: ../treckba-corpus/index/
+cross-opts:
+  quote: [true]
 
 persistence-provider: |
   inherit: ecd.default-log-persistence-provider
