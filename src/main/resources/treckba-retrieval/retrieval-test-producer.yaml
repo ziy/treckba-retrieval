@@ -1,0 +1,46 @@
+configuration: 
+  name: treckba-retrieval
+  author: ziy
+
+persistence-provider:
+  inherit: treckba-retrieval.persistence.local-persistence-provider
+
+async-configuration:
+  inherit: treckba-retrieval.async.cse-broker
+
+collection-reader:
+  inherit: treckba-retrieval.collection.treckba-topic-collection-reader
+  decorators: |
+    - inherit: treckba-retrieval.collection.retrieval-gs-decorator-test
+
+pipeline:
+  - inherit: ecd.phase
+    name: keyterm-expansion
+    options: |
+      - inherit: treckba-retrieval.keyterm.simple
+
+  - inherit: ecd.phase
+    name: retrieval-strategist
+    options: |
+      - inherit: treckba-retrieval.retrieval.multi-searcher-test
+
+  - inherit: ecd.phase
+    name: rescale
+    options: |
+      - inherit: treckba-retrieval.rescale.minmax
+      - inherit: treckba-retrieval.rescale.constant
+
+  - inherit: ecd.phase
+    name: filter
+    options: |
+      - inherit: treckba-retrieval.filter.threshold
+
+  - inherit: treckba-retrieval.eval.retrieval-trace-evaluator-aggregator
+    relevance-level: RELEVANCE
+
+post-process:
+  - inherit: jdbc.eval.retrieval-evaluator-consumer
+
+  - inherit: report.csv-report-generator
+    builders: |
+      - inherit: jdbc.report.f-measure-report-component

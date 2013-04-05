@@ -28,7 +28,7 @@ public final class TrecKbaTopicCollectionReader extends IterableCollectionReader
     }
   }
 
-  private final class TrecKbaTopicElementIterator implements Iterator<DataElement> {
+  public final class TrecKbaTopicElementIterator implements Iterator<DataElement> {
 
     private int ptr;
 
@@ -55,6 +55,10 @@ public final class TrecKbaTopicCollectionReader extends IterableCollectionReader
 
     @Override
     public void remove() {
+    }
+    
+    public String getTopicAt(int index) {
+      return topics[index];
     }
 
   }

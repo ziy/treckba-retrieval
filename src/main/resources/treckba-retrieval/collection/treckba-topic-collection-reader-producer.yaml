@@ -1,0 +1,8 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.collection.TrecKbaTopicCollectionReaderProducer
+dataset: TRECKBA12
+input: /input/trec-kba-ccr-2012.filter-topics.json
+
+persistence-provider: |
+  inherit: treckba-retrieval.persistence.peace-persistence-provider
+
+broker-url: tcp://peace.isri.cs.cmu.edu:61616
