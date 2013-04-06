@@ -143,10 +143,10 @@ public class MultiSearcherRetrievalStrategist extends AbstractRetrievalStrategis
       File dir = new File(indexRoot, input);
       try {
         IndexReader reader = DirectoryReader.open(FSDirectory.open(dir));
-        System.out.println("[index]" + dir.getName() + " open successfully.");
+        System.out.println("[index]" + dir.getName() + " OK");
         return reader;
       } catch (IOException e) {
-        System.out.println("[index]" + dir.getName() + " open unsuccessfully.");
+        System.out.println("[index]" + dir.getName() + " Error");
         return null;
       }
     }
