@@ -3,13 +3,13 @@ configuration:
   author: ziy
 
 persistence-provider:
-  inherit: treckba-retrieval.persistence.local-persistence-provider
+  inherit: treckba-retrieval.persistence.peace-persistence-provider
 
 async-configuration:
   inherit: treckba-retrieval.async.cse-broker
 
 collection-reader:
-  inherit: treckba-retrieval.collection.treckba-topic-collection-reader
+  inherit: treckba-retrieval.collection.treckba-topic-collection-reader-producer
   decorators: |
     - inherit: treckba-retrieval.collection.retrieval-gs-decorator-test
 
