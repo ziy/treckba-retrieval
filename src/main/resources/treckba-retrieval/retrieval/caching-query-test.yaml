@@ -1,0 +1,9 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.retrieval.CachingQueryRetrievalStrategist
+dirs-file: ../treckba-corpus/corpus/dir-list-test.txt
+index-root: ../treckba-corpus/index/
+queries-dir: retrieval-cache/queries
+cross-opts:
+  quote: [true, false]
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider
