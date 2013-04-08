@@ -2,6 +2,7 @@ class: edu.cmu.cs.ziy.courses.expir.treckba.retrieval.CachingQueryRetrievalStrat
 dirs-file: ../treckba-corpus/corpus/dir-list-test.txt
 index-root: ../treckba-corpus/index/
 queries-dir: retrieval-cache/queries
+cache-file: retrieval-cache/cache.db3
 cross-opts:
   quote: [true, false]
 
