@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -26,6 +27,7 @@ import org.apache.lucene.util.Version;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.io.Files;
 import com.google.common.io.PatternFilenameFilter;
@@ -54,7 +56,7 @@ public class SimpleLuceneRetriever {
     for (int i = 0; i < indexes.length; i++) {
       IndexReader reader = DirectoryReader.open(FSDirectory.open(indexes[i]));
       searchers[i] = new IndexSearcher(reader);
-      System.out.println(indexes[i].getName() + " opened.");
+      // System.out.println(indexes[i].getName() + " opened.");
     }
     Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_42);
     parser = new QueryParser(Version.LUCENE_42, textField, analyzer);
@@ -85,7 +87,7 @@ public class SimpleLuceneRetriever {
     Table<String, String, List<IdScorePair>> query2dir2pairs = HashBasedTable.create();
     for (String query : queries) {
       for (int i = 0; i < indexes.length; i++) {
-        System.out.println("retrieved " + query + " from " + indexes[i].getName() + ".");
+        // System.out.println("retrieved " + query + " from " + indexes[i].getName() + ".");
         query2dir2pairs.put(query, indexes[i].getName(),
                 retrieveDocuments(searchers[i], query, numHits));
       }
@@ -145,7 +147,7 @@ public class SimpleLuceneRetriever {
 
     File[] indexes = new File(indexRoot).listFiles(new PatternFilenameFilter(Pattern
             .quote(dirPrefix) + ".*"));
-    List<String> queries = Lists.newArrayList();
+    Set<String> queries = Sets.newHashSet();
     for (File queriesFile : new File(queriesDir).listFiles()) {
       queries.addAll(Files.readLines(queriesFile, Charset.defaultCharset()));
     }
@@ -155,8 +157,8 @@ public class SimpleLuceneRetriever {
     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outfile));
     oos.writeObject(query2dir2pairs);
     oos.close();
-    System.out.println(dirPrefix + " generate temp file of " + query2dir2pairs.size()
-            + " elements.");
+    // System.out.println(dirPrefix + " generate temp file of " + query2dir2pairs.size()
+    // + " elements.");
   }
 
   public static class IdScorePair implements Serializable {

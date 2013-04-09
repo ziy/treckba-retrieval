@@ -33,20 +33,18 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
           String homeRoot, String projectDir) throws SqlJetException, IOException, ParseException,
           CondorException, InterruptedException, ClassNotFoundException {
     super(dbFile);
-    Set<String> dirPrefixes = Sets.newHashSet(FluentIterable
-            .from(Files.readLines(dirsFile, Charset.defaultCharset()))
-            .filter(new ExistAndIsDir(indexRoot)).transform(new FixedLengthPrefixGetter(10)));
-    File logDir = new File(projectDir, "log");
-    if (logDir.exists()) {
-      FileUtils.deleteDirectory(logDir);
-    }
-    logDir.mkdir();
+    // Set<String> dirPrefixes = Sets.newHashSet(FluentIterable
+    // .from(Files.readLines(dirsFile, Charset.defaultCharset()))
+    // .filter(new ExistAndIsDir(indexRoot)).transform(new FixedLengthPrefixGetter(10)));
+    Set<String> dirPrefixes = Sets.newHashSet(FluentIterable.from(
+            Files.readLines(dirsFile, Charset.defaultCharset())).filter(
+            new ExistAndIsDir(indexRoot)));
     File tempDir = new File(projectDir, "tmp");
     if (tempDir.exists()) {
       FileUtils.deleteDirectory(tempDir);
     }
     tempDir.mkdir();
-    Condor condor = new Condor(new File(logDir, "main.log").getCanonicalPath());
+    Condor condor = new Condor(new File(tempDir, "main.log").getCanonicalPath());
     Set<File> tempFiles = Sets.newHashSet();
     for (String dirPrefix : dirPrefixes) {
       File tempFile = File.createTempFile("cache-" + dirPrefix + "-", null, tempDir);
@@ -60,9 +58,9 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
       jd.addAttribute("universe", "vanilla");
       jd.addAttribute("executable", "/usr/java/latest/bin/java");
       jd.addAttribute("arguments", arguments);
-      jd.addAttribute("log", new File(logDir, dirPrefix + ".condor").getCanonicalPath());
-      jd.addAttribute("output", new File(logDir, dirPrefix + ".log").getCanonicalPath());
-      jd.addAttribute("error", new File(logDir, dirPrefix + ".err").getCanonicalPath());
+      // jd.addAttribute("log", new File(tempDir, dirPrefix + ".condor").getCanonicalPath());
+      jd.addAttribute("output", new File(tempDir, dirPrefix + ".log").getCanonicalPath());
+      jd.addAttribute("error", new File(tempDir, dirPrefix + ".err").getCanonicalPath());
       jd.addQueue();
       Cluster c = condor.submit(jd);
       System.out.println("submitted " + c + " for " + dirPrefix + ".");
