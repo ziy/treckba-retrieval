@@ -21,7 +21,7 @@ import com.google.common.collect.Lists;
 
 import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
 
-public class MultiSearcherRetrievalStrategist extends AbstractSimpleQueryGenerationRetrievalStrategist {
+public class MultiSearcherRetrievalStrategist extends AbstractSimpleQueryGenerationLuceneRetrievalStrategist {
 
   private IndexSearcher searcher;
 
