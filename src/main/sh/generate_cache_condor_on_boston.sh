@@ -10,7 +10,7 @@ INDEX_ROOT=/bos/tmp4/ziy/treckba-corpus/index
 HOME=/bos/usr7/ziy
 # Execute
 export JAVA_HOME=$JAVA_HOME
-export MAVEN_OPTS=-Xmx2g
+export MAVEN_OPTS=-Xmx1g
 cd $PROJECT_HOME
 TIME="$(date +%s)"
 $MAVEN_HOME/mvn clean package exec:java -Dgenerate-cache-condor \

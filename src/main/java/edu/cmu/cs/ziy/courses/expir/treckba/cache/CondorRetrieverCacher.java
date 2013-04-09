@@ -47,7 +47,8 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
     Condor condor = new Condor(new File(tempDir, "main.log").getCanonicalPath());
     Set<File> tempFiles = Sets.newHashSet();
     for (String dirPrefix : dirPrefixes) {
-      File tempFile = File.createTempFile("cache-" + dirPrefix + "-", null, tempDir);
+      File tempFile = File.createTempFile(dirPrefix + "-", null, tempDir);
+      tempFiles.add(tempFile);
       String arguments = String.format(
               "-cp %s %s %s %s %s %s %s %s %s",
               SimpleLuceneRetriever.CLASSPATH.replace("%HOME", homeRoot).replace("%PROJECT",
@@ -73,7 +74,13 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
       }
       Thread.sleep(20 * 1000);
     }
+
+    int i = 0;
     for (File tempFile : tempFiles) {
+      if (tempFile.length() <= 0) {
+        continue;
+      }
+      System.out.println("adding " + i++ + ": " + tempFile.getName() + ".");
       ObjectInputStream ois = new ObjectInputStream(new FileInputStream(tempFile));
       @SuppressWarnings("unchecked")
       Table<String, String, List<IdScorePair>> results = (Table<String, String, List<IdScorePair>>) ois
@@ -82,7 +89,6 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
       for (Table.Cell<String, String, List<IdScorePair>> result : results.cellSet()) {
         addToCache(result.getRowKey(), result.getColumnKey(),
                 (ArrayList<IdScorePair>) result.getValue());
-        System.out.println(tempFile.getName() + " added to cache.");
       }
     }
   }
