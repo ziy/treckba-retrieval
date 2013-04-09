@@ -39,11 +39,6 @@
       <version>2.3.1</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-core</artifactId>
-      <version>4.2.0</version>
-    </dependency>
-    <dependency>
       <groupId>edu.cmu.lti.oaqa.bio.core</groupId>
       <artifactId>baseqa</artifactId>
       <version>1.9.1</version>
@@ -66,7 +61,22 @@
     <dependency>
       <groupId>edu.wisc.cs</groupId>
       <artifactId>condor-api</artifactId>
-      <version>0.0.1</version>
+      <version>0.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>4.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>4.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>4.2.0</version>
     </dependency>
   </dependencies>
   <properties>
@@ -203,6 +213,33 @@
               <arguments>
                 <argument>treckba-retrieval.retrieval-generate-queries</argument>
               </arguments>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>generate-cache-condor</id>
+      <activation>
+        <property>
+          <name>generate-cache-condor</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>java</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <mainClass>edu.cmu.cs.ziy.courses.expir.treckba.cache.CondorRetrieverCacher</mainClass>
             </configuration>
           </plugin>
         </plugins>

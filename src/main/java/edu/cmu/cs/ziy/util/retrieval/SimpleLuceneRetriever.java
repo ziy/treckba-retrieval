@@ -5,9 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -25,6 +27,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import com.google.common.io.Files;
+import com.google.common.io.PatternFilenameFilter;
 
 public class SimpleLuceneRetriever {
 
@@ -36,6 +40,13 @@ public class SimpleLuceneRetriever {
 
   private QueryParser parser;
 
+  public static final String CLASSPATH = "%HOME/.m2/repository/org/apache/lucene/lucene-core/4.2.0/lucene-core-4.2.0.jar"
+          + ":%HOME/.m2/repository/org/apache/lucene/lucene-queryparser/4.2.0/lucene-queryparser-4.2.0.jar"
+          + ":%HOME/.m2/repository/org/apache/lucene/lucene-queries/4.2.0/lucene-queries-4.2.0.jar"
+          + ":%HOME/.m2/repository/org/apache/lucene/lucene-analyzers-common/4.2.0/lucene-analyzers-common-4.2.0.jar"
+          + ":%HOME/.m2/repository/com/google/guava/guava/14.0/guava-14.0.jar"
+          + ":%PROJECT/target/classes";
+
   public SimpleLuceneRetriever(File[] indexes, String idField, String textField) throws IOException {
     this.indexes = indexes;
     this.idField = idField;
@@ -43,6 +54,7 @@ public class SimpleLuceneRetriever {
     for (int i = 0; i < indexes.length; i++) {
       IndexReader reader = DirectoryReader.open(FSDirectory.open(indexes[i]));
       searchers[i] = new IndexSearcher(reader);
+      System.out.println(indexes[i].getName() + " opened.");
     }
     Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_42);
     parser = new QueryParser(Version.LUCENE_42, textField, analyzer);
@@ -73,6 +85,7 @@ public class SimpleLuceneRetriever {
     Table<String, String, List<IdScorePair>> query2dir2pairs = HashBasedTable.create();
     for (String query : queries) {
       for (int i = 0; i < indexes.length; i++) {
+        System.out.println("retrieved " + query + " from " + indexes[i].getName() + ".");
         query2dir2pairs.put(query, indexes[i].getName(),
                 retrieveDocuments(searchers[i], query, numHits));
       }
@@ -81,7 +94,7 @@ public class SimpleLuceneRetriever {
   }
 
   /**
-   * Entry point
+   * Entry point directly from command line
    * 
    * @param args
    *          index_root, num_dirs, dir0, dir1, ..., dirn, num_queries, query0, query1, ..., queryn,
@@ -89,7 +102,7 @@ public class SimpleLuceneRetriever {
    * @throws IOException
    * @throws ParseException
    */
-  public static void main(String[] args) throws IOException, ParseException {
+  public static void exmaple(String[] args) throws IOException, ParseException {
     String indexRoot = args[0];
     int numDirs = Integer.parseInt(args[1]);
     String[] dirs = Arrays.copyOfRange(args, 2, 2 + numDirs);
@@ -104,12 +117,46 @@ public class SimpleLuceneRetriever {
     for (int i = 0; i < numDirs; i++) {
       indexes[i] = new File(indexRoot, dirs[i]);
     }
+
     SimpleLuceneRetriever retriever = new SimpleLuceneRetriever(indexes, idField, textField);
     Table<String, String, List<IdScorePair>> query2dir2pairs = retriever.retrieveDocuments(queries,
             numHits);
     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outfile));
     oos.writeObject(query2dir2pairs);
     oos.close();
+  }
+
+  /**
+   * Entry point for batch executation, e.g. condor
+   * 
+   * @param args
+   *          index_root, dir_prefix, queries_dir, id_field, text_field, num_hits, outfile
+   * @throws IOException
+   * @throws ParseException
+   */
+  public static void main(String[] args) throws IOException, ParseException {
+    String indexRoot = args[0];
+    String dirPrefix = args[1];
+    String queriesDir = args[2];
+    String idField = args[3];
+    String textField = args[4];
+    int numHits = Integer.parseInt(args[5]);
+    String outfile = args[6];
+
+    File[] indexes = new File(indexRoot).listFiles(new PatternFilenameFilter(Pattern
+            .quote(dirPrefix) + ".*"));
+    List<String> queries = Lists.newArrayList();
+    for (File queriesFile : new File(queriesDir).listFiles()) {
+      queries.addAll(Files.readLines(queriesFile, Charset.defaultCharset()));
+    }
+    SimpleLuceneRetriever retriever = new SimpleLuceneRetriever(indexes, idField, textField);
+    Table<String, String, List<IdScorePair>> query2dir2pairs = retriever.retrieveDocuments(
+            queries.toArray(new String[0]), numHits);
+    ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outfile));
+    oos.writeObject(query2dir2pairs);
+    oos.close();
+    System.out.println(dirPrefix + " generate temp file of " + query2dir2pairs.size()
+            + " elements.");
   }
 
   public static class IdScorePair implements Serializable {
