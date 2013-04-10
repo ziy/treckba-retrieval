@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.tmatesoft.sqljet.core.SqlJetException;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -24,6 +24,7 @@ import condorAPI.Cluster;
 import condorAPI.Condor;
 import condorAPI.CondorException;
 import condorAPI.JobDescription;
+import edu.cmu.cs.ziy.util.retrieval.SimpleBatchPeriodicallyValidLuceneRetriever;
 import edu.cmu.cs.ziy.util.retrieval.SimpleLuceneRetriever;
 import edu.cmu.cs.ziy.util.retrieval.SimpleLuceneRetriever.IdScorePair;
 
@@ -34,11 +35,10 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
           CondorException, InterruptedException, ClassNotFoundException {
     super(dbFile);
     // Set<String> dirPrefixes = Sets.newHashSet(FluentIterable
-    // .from(Files.readLines(dirsFile, Charset.defaultCharset()))
+    // .from(Files.readLines(dirsFile, Charsets.UTF_8))
     // .filter(new ExistAndIsDir(indexRoot)).transform(new FixedLengthPrefixGetter(10)));
     Set<String> dirPrefixes = Sets.newHashSet(FluentIterable.from(
-            Files.readLines(dirsFile, Charset.defaultCharset())).filter(
-            new ExistAndIsDir(indexRoot)));
+            Files.readLines(dirsFile, Charsets.UTF_8)).filter(new ExistAndIsDir(indexRoot)));
     File tempDir = new File(projectDir, "tmp");
     if (tempDir.exists()) {
       FileUtils.deleteDirectory(tempDir);
@@ -52,7 +52,8 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
       String arguments = String.format(
               "-cp %s %s %s %s %s %s %s %s %s",
               SimpleLuceneRetriever.CLASSPATH.replace("%HOME", homeRoot).replace("%PROJECT",
-                      projectDir), SimpleLuceneRetriever.class.getCanonicalName(),
+                      projectDir),
+              SimpleBatchPeriodicallyValidLuceneRetriever.class.getCanonicalName(),
               indexRoot.getCanonicalFile(), dirPrefix, queriesDir, "stream-id", "body", 100,
               tempFile.getCanonicalPath());
       JobDescription jd = new JobDescription();
