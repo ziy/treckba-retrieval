@@ -2,6 +2,7 @@ package edu.cmu.cs.ziy.util.guava;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,6 +11,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import com.google.common.collect.TreeRangeSet;
+
+import edu.cmu.cs.ziy.util.CalendarUtils;
 
 public class RangeSetParser {
 
@@ -23,6 +26,10 @@ public class RangeSetParser {
     String rangeSteStr = rangeSet.toString();
     RangeSet<Integer> recovered = parse(rangeSteStr, integerParser());
     System.out.println(recovered.equals(rangeSet));
+
+    RangeSet<Calendar> periods = parse("[2011-11-07-12\u20252011-12-10-03)",
+            calendarParser(new SimpleDateFormat(CalendarUtils.YMDH_FORMAT)));
+    System.out.println(periods);
   }
 
   public static Pattern RANGE_PATTERN = Pattern.compile("([\\[\\(])(.*?)\u2025(.*?)([\\]\\)])");
