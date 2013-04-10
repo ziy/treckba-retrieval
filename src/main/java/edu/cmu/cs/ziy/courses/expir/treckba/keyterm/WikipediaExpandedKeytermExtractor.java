@@ -1,7 +1,6 @@
 package edu.cmu.cs.ziy.courses.expir.treckba.keyterm;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.Set;
 import org.apache.uima.UimaContext;
 import org.apache.uima.resource.ResourceInitializationException;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -40,7 +40,7 @@ public class WikipediaExpandedKeytermExtractor extends SimpleKeytermExtractor {
             (String) context.getConfigParameterValue("expanded-keyterm"));
     try {
       for (String line : Resources.readLines(Resources.getResource(getClass(), expandedKeyterm),
-              Charset.defaultCharset())) {
+              Charsets.UTF_8)) {
         String[] segs = line.split("\t");
         WikipediaEntity entity = WikipediaEntity.newInstance(segs[0], Relation.valueOf(segs[2]),
                 RangeSetParser.parse(segs[3], RangeSetParser.calendarParser(df)));
@@ -83,6 +83,9 @@ public class WikipediaExpandedKeytermExtractor extends SimpleKeytermExtractor {
     try {
       String title = question.replace('_', ' ');
       for (WikipediaEntity entity : keyterm2expands.get(title)) {
+        if (!relations.contains(entity.getRelation())) {
+          continue;
+        }
         Keyterm keyterm = new Keyterm(extractKeyterm(entity.getText()));
         keyterm.setComponentId(CalendarUtils.rangeSetToString(entity.getValidPeriods(),
                 CalendarUtils.YMDH_FORMAT));
