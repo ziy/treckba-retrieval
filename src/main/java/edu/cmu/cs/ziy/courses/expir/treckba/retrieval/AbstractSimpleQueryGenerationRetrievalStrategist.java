@@ -41,16 +41,17 @@ public abstract class AbstractSimpleQueryGenerationRetrievalStrategist extends
   @Override
   protected List<RetrievalResult> retrieveDocuments(String question, List<Keyterm> keyterms) {
     // parse query
-    String query = generateQuery(keyterms);
-    log("Query: " + query);
-    List<RetrievalResult> results = retrieveDocuments(query);
+    List<String> queries = generateQuery(keyterms);
+    log("Query: " + queries);
+    List<RetrievalResult> results = retrieveDocuments(queries);
     return results;
   }
 
-  protected abstract List<RetrievalResult> retrieveDocuments(String query);
+  protected abstract List<RetrievalResult> retrieveDocuments(List<String> queries);
 
-  protected String generateQuery(List<Keyterm> keyterms) {
-    return Joiner.on(' ').join(Lists.transform(keyterms, new KeytermStringGetter(quote)));
+  protected List<String> generateQuery(List<Keyterm> keyterms) {
+    return Lists.newArrayList(Joiner.on(' ').join(
+            Lists.transform(keyterms, new KeytermStringGetter(quote))));
   }
 
   public static class KeytermStringGetter implements Function<Keyterm, String> {

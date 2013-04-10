@@ -12,11 +12,18 @@ collection-reader:
 
 pipeline:
   - inherit: ecd.phase
-    name: keyterm-expansion
+    name: keyterm-extractor
     options: |
-      - inherit: treckba-retrieval.keyterm.simple
+      - inherit: treckba-retrieval.keyterm.wikipedia-expanded
+#      - inherit: treckba-retrieval.keyterm.simple
+
+  - inherit: ecd.phase
+    name: keyterm-update
+    options: |
+      - inherit: treckba-retrieval.keyterm.lucene-escape
 
   - inherit: ecd.phase
     name: retrieval-strategist
     options: |
-      - inherit: treckba-retrieval.retrieval.caching-query-test
+      - inherit: treckba-retrieval.retrieval.periodically-valid-queries-writer
+#      - inherit: treckba-retrieval.retrieval.simple-queries-writer

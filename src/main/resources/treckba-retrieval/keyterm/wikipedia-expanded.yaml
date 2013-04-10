@@ -1,0 +1,13 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.keyterm.WikipediaExpandedKeytermExtractor
+expanded-keyterm: /treckba-retrieval/keyterm/expanded-keyterms.tsv
+cross-opts: 
+  use-redirect: [true, false]
+  use-category: [true, false]
+  use-inlink: [true, false]
+  use-outlink: [true, false]
+  use-inlink-anchor: [true, false]
+  use-outlink-anchor: [false]
+  use-boldtext: [false]
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider

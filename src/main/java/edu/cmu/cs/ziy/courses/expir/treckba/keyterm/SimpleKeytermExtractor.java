@@ -14,10 +14,7 @@ public class SimpleKeytermExtractor extends AbstractKeytermExtractor {
     if (question.equals("William_H._Gates,_Sr")) {
       question = "William_H._Gates,_Sr.";
     }
-    String keyterm = extractKeyterm(question);
-    List<Keyterm> keyterms = Lists.newArrayList(new Keyterm(keyterm));
-    log(keyterms.toString());
-    return keyterms;
+    return Lists.newArrayList(new Keyterm(extractKeyterm(question)));
   }
 
   protected String extractKeyterm(String keyterm) {

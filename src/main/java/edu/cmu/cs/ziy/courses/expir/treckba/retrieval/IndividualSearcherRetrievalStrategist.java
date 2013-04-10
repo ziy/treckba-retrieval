@@ -33,14 +33,15 @@ public class IndividualSearcherRetrievalStrategist extends MultiSearcherRetrieva
   }
 
   @Override
-  protected List<RetrievalResult> retrieveDocuments(String query) {
+  protected List<RetrievalResult> retrieveDocuments(List<String> queries) {
     ScoreDoc[] hits;
     List<RetrievalResult> results = Lists.newArrayList();
     try {
       for (IndexSearcher searcher : searchers) {
-        hits = searcher.search(parser.parse(query), 100).scoreDocs;
+        hits = searcher.search(parser.parse(queries.get(0)), 100).scoreDocs;
         for (ScoreDoc hit : hits) {
-          results.add(new RetrievalResult(searcher.doc(hit.doc).get("stream-id"), hit.score, query));
+          results.add(new RetrievalResult(searcher.doc(hit.doc).get("stream-id"), hit.score,
+                  queries.get(0)));
         }
       }
     } catch (IOException e) {
