@@ -18,7 +18,7 @@ import edu.cmu.cs.ziy.util.cache.SqliteCacher;
 import edu.cmu.cs.ziy.util.retrieval.SimpleLuceneRetriever.IdScorePair;
 import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
 
-public class CachingQueryRetrievalStrategist extends
+public class SimpleCachingQueryRetrievalStrategist extends
         AbstractSimpleQueryGenerationRetrievalStrategist {
 
   private static final String START_DATE_PROPERTY = "treckba-retrieval.retrieval.start-date";
