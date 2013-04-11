@@ -18,6 +18,8 @@ public class SqliteCacher<T extends Serializable> {
 
   private SqlJetDb db;
 
+  private ISqlJetTable table;
+
   public static enum Type {
     INTEGER, TEXT, REAL, BLOB
   };
@@ -62,8 +64,9 @@ public class SqliteCacher<T extends Serializable> {
     return new SqliteCacher<T>(db);
   }
 
-  private SqliteCacher(SqlJetDb db) {
+  private SqliteCacher(SqlJetDb db) throws SqlJetException {
     this.db = db;
+    this.table = db.getTable("cache");
   }
 
   @SuppressWarnings("unchecked")
@@ -71,7 +74,6 @@ public class SqliteCacher<T extends Serializable> {
     db.beginTransaction(SqlJetTransactionMode.READ_ONLY);
     List<T> results = Lists.newArrayList();
     try {
-      ISqlJetTable table = db.getTable("cache");
       ISqlJetCursor cursor = table.lookup("keys", keys);
       if (!cursor.eof()) {
         do {
@@ -84,10 +86,26 @@ public class SqliteCacher<T extends Serializable> {
     return results;
   }
 
-  public void insert(Serializable value, Object... keys) throws SqlJetException {
+  public void batchWriteStart() throws SqlJetException {
+    db.beginTransaction(SqlJetTransactionMode.WRITE);
+  }
+
+  public void batchWriteCommit() throws SqlJetException {
+    db.commit();
+  }
+
+  public void batchInsert(T value, Object... keys) throws SqlJetException {
+    Object[] fields = new Object[keys.length + 1];
+    fields[0] = SerializationUtils.serialize(value);
+    for (int i = 0; i < keys.length; i++) {
+      fields[i + 1] = keys[i];
+    }
+    table.insert(fields);
+  }
+
+  public void insert(T value, Object... keys) throws SqlJetException {
     db.beginTransaction(SqlJetTransactionMode.WRITE);
     try {
-      ISqlJetTable table = db.getTable("cache");
       Object[] fields = new Object[keys.length + 1];
       fields[0] = SerializationUtils.serialize(value);
       for (int i = 0; i < keys.length; i++) {

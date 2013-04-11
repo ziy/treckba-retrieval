@@ -3,7 +3,6 @@ package edu.cmu.cs.ziy.courses.expir.treckba.cache;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -40,8 +39,7 @@ public class LocalRetrieverCacher extends AbstractRetrieverCacher {
       Table<String, String, List<IdScorePair>> results = retriever.retrieveDocuments(
               queries.toArray(new String[0]), 100);
       for (Table.Cell<String, String, List<IdScorePair>> result : results.cellSet()) {
-        addToCache(result.getRowKey(), result.getColumnKey(),
-                (ArrayList<IdScorePair>) result.getValue());
+        addToCache(result.getRowKey(), Lists.newArrayList(result.getValue()));
       }
     }
   }

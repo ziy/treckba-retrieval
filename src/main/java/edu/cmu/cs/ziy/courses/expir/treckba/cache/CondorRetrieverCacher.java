@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -15,9 +15,13 @@ import org.tmatesoft.sqljet.core.SqlJetException;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
 import com.google.common.io.Files;
 
 import condorAPI.Cluster;
@@ -77,6 +81,7 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
     }
 
     int i = 0;
+    ListMultimap<String, IdScorePair> buffer = ArrayListMultimap.create();
     for (File tempFile : tempFiles) {
       if (tempFile.length() <= 0) {
         continue;
@@ -86,12 +91,22 @@ public class CondorRetrieverCacher extends AbstractRetrieverCacher {
       @SuppressWarnings("unchecked")
       Table<String, String, List<IdScorePair>> results = (Table<String, String, List<IdScorePair>>) ois
               .readObject();
-      ois.close();
-      for (Table.Cell<String, String, List<IdScorePair>> result : results.cellSet()) {
-        addToCache(result.getRowKey(), result.getColumnKey(),
-                (ArrayList<IdScorePair>) result.getValue());
+      for (Cell<String, String, List<IdScorePair>> result : results.cellSet()) {
+        Collection<IdScorePair> pairs = Collections2.filter(result.getValue(), new Predicate<IdScorePair>(){
+
+          @Override
+          public boolean apply(IdScorePair input) {
+            return input.getScore() > 0.2f;
+          }});
+        buffer.putAll(result.getRowKey(), pairs);
       }
+      if (i % 100 == 0) {
+        addToCache(buffer);
+        buffer.clear();
+      }
+      ois.close();
     }
+    addToCache(buffer);
   }
 
   public static void main(String[] args) throws SqlJetException, IOException, ParseException,
