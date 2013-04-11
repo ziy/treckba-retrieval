@@ -49,7 +49,10 @@ public class WikipediaExpandedKeytermExtractor extends SimpleKeytermExtractor {
     } catch (IOException e) {
       throw new ResourceInitializationException(e);
     }
-
+    
+    if ((Boolean) context.getConfigParameterValue("use-original")) {
+      relations.add(Relation.ORIGINAL);
+    }
     if ((Boolean) context.getConfigParameterValue("use-redirect")) {
       relations.add(Relation.REDIRECT);
     }

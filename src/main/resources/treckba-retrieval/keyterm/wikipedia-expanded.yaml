@@ -1,6 +1,7 @@
 class: edu.cmu.cs.ziy.courses.expir.treckba.keyterm.WikipediaExpandedKeytermExtractor
 expanded-keyterm: /treckba-retrieval/keyterm/expanded-keyterms.tsv
 cross-opts: 
+  use-original: [true]
   use-redirect: [true, false]
   use-category: [true, false]
   use-inlink: [true, false]
