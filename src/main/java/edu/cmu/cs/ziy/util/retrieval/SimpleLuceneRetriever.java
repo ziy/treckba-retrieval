@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -62,11 +63,11 @@ public class SimpleLuceneRetriever {
           throws IOException, ParseException {
     List<IdScorePair> pairs = Lists.newArrayList();
     try {
-    ScoreDoc[] hits = searcher.search(parser.parse(query), numHits).scoreDocs;
-    for (ScoreDoc hit : hits) {
-      Document doc = searcher.doc(hit.doc);
-      pairs.add(new IdScorePair(doc.get(idField), hit.score));
-    }
+      ScoreDoc[] hits = searcher.search(parser.parse(query), numHits).scoreDocs;
+      for (ScoreDoc hit : hits) {
+        Document doc = searcher.doc(hit.doc);
+        pairs.add(new IdScorePair(doc.get(idField), hit.score));
+      }
     } catch (Exception e) {
       System.out.println("!! " + query.split(" ").length);
     }
@@ -175,5 +176,19 @@ public class SimpleLuceneRetriever {
       return score;
     }
 
+    @Override
+    public String toString() {
+      return id + ": " + score;
+    }
+
+    public static Comparator<IdScorePair> getScoreComparator() {
+      return new Comparator<IdScorePair>() {
+
+        @Override
+        public int compare(IdScorePair o1, IdScorePair o2) {
+          return Float.compare(o1.getScore(), o2.getScore());
+        }
+      };
+    }
   }
 }

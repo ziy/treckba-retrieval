@@ -23,6 +23,7 @@ public abstract class AbstractRetrieverCacher {
     } else {
       cacher = SqliteCacher.open(dbFile);
     }
+    SqliteCacher.setTransactionCommitFrequency(1000);
   }
 
   protected void addToCache(String query, ArrayList<IdScorePair> pairs) throws SqlJetException {
@@ -35,11 +36,9 @@ public abstract class AbstractRetrieverCacher {
 
   protected void addToCache(ListMultimap<String, IdScorePair> query2pairs) throws SqlJetException {
     try {
-      cacher.batchWriteStart();
       for (String query : query2pairs.keySet()) {
         cacher.batchInsert(Lists.newArrayList(query2pairs.get(query)), query);
       }
-      cacher.batchWriteCommit();
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -20,6 +20,16 @@ public class SqliteCacher<T extends Serializable> {
 
   private ISqlJetTable table;
 
+  private boolean isTransactionBegun;
+
+  private int numTransactions;
+
+  private static int FREQUENCY;
+
+  public static void setTransactionCommitFrequency(int frequency) {
+    FREQUENCY = frequency;
+  }
+
   public static enum Type {
     INTEGER, TEXT, REAL, BLOB
   };
@@ -67,11 +77,13 @@ public class SqliteCacher<T extends Serializable> {
   private SqliteCacher(SqlJetDb db) throws SqlJetException {
     this.db = db;
     this.table = db.getTable("cache");
+    this.isTransactionBegun = false;
+    this.numTransactions = 0;
   }
 
   @SuppressWarnings("unchecked")
   public List<T> lookup(Object... keys) throws SqlJetException {
-    db.beginTransaction(SqlJetTransactionMode.READ_ONLY);
+    checkAndBeginTransaction(SqlJetTransactionMode.READ_ONLY);
     List<T> results = Lists.newArrayList();
     try {
       ISqlJetCursor cursor = table.lookup("keys", keys);
@@ -81,30 +93,65 @@ public class SqliteCacher<T extends Serializable> {
         } while (cursor.next());
       }
     } finally {
-      db.commit();
+      commitTransaction();
     }
     return results;
   }
 
-  public void batchWriteStart() throws SqlJetException {
-    db.beginTransaction(SqlJetTransactionMode.WRITE);
+  public void batchUpdate(T value, Object... keys) throws SqlJetException {
+    checkAndBeginTransaction(SqlJetTransactionMode.WRITE);
+    Object[] fields = new Object[keys.length + 1];
+    fields[0] = SerializationUtils.serialize(value);
+    for (int i = 0; i < keys.length; i++) {
+      fields[i + 1] = keys[i];
+    }
+    ISqlJetCursor cursor = table.lookup("keys", keys);
+    if (!cursor.eof()) {
+      do {
+        cursor.update(fields);
+      } while (cursor.next());
+    }
+    if (numTransactions > FREQUENCY) {
+      commitTransaction();
+    }
   }
 
-  public void batchWriteCommit() throws SqlJetException {
-    db.commit();
+  public void update(T value, Object... keys) throws SqlJetException {
+    checkAndBeginTransaction(SqlJetTransactionMode.WRITE);
+    try {
+      Object[] fields = new Object[keys.length + 1];
+      fields[0] = SerializationUtils.serialize(value);
+      for (int i = 0; i < keys.length; i++) {
+        fields[i + 1] = keys[i];
+      }
+      ISqlJetCursor cursor = table.lookup("keys", keys);
+      if (!cursor.eof()) {
+        do {
+          cursor.update(fields);
+          numTransactions++;
+        } while (cursor.next());
+      }
+    } finally {
+      commitTransaction();
+    }
   }
 
   public void batchInsert(T value, Object... keys) throws SqlJetException {
+    checkAndBeginTransaction(SqlJetTransactionMode.WRITE);
     Object[] fields = new Object[keys.length + 1];
     fields[0] = SerializationUtils.serialize(value);
     for (int i = 0; i < keys.length; i++) {
       fields[i + 1] = keys[i];
     }
     table.insert(fields);
+    numTransactions++;
+    if (numTransactions > FREQUENCY) {
+      commitTransaction();
+    }
   }
 
   public void insert(T value, Object... keys) throws SqlJetException {
-    db.beginTransaction(SqlJetTransactionMode.WRITE);
+    checkAndBeginTransaction(SqlJetTransactionMode.WRITE);
     try {
       Object[] fields = new Object[keys.length + 1];
       fields[0] = SerializationUtils.serialize(value);
@@ -113,12 +160,30 @@ public class SqliteCacher<T extends Serializable> {
       }
       table.insert(fields);
     } finally {
-      db.commit();
+      commitTransaction();
     }
   }
 
   public void close() throws SqlJetException {
+    commitTransaction();
     db.close();
+  }
+
+  private void checkAndBeginTransaction(SqlJetTransactionMode mode) throws SqlJetException {
+    if (!isTransactionBegun) {
+      beginTransaction(mode);
+    }
+  }
+
+  private void beginTransaction(SqlJetTransactionMode mode) throws SqlJetException {
+    db.beginTransaction(mode);
+    isTransactionBegun = true;
+  }
+
+  private void commitTransaction() throws SqlJetException {
+    db.commit();
+    isTransactionBegun = false;
+    numTransactions = 0;
   }
 
 }

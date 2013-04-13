@@ -32,7 +32,7 @@ pipeline:
     name: rescale
     options: |
       - inherit: treckba-retrieval.rescale.constant
-      - inherit: treckba-retrieval.rescale.minmax
+#      - inherit: treckba-retrieval.rescale.minmax
 
   - inherit: ecd.phase
     name: filter
