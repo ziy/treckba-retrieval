@@ -14,8 +14,8 @@ pipeline:
   - inherit: ecd.phase
     name: keyterm-extractor
     options: |
-      - inherit: treckba-retrieval.keyterm.wikipedia-expanded
-#      - inherit: treckba-retrieval.keyterm.simple
+      - inherit: treckba-retrieval.keyterm.simple
+#      - inherit: treckba-retrieval.keyterm.wikipedia-expanded
 
   - inherit: ecd.phase
     name: keyterm-update
@@ -25,8 +25,8 @@ pipeline:
   - inherit: ecd.phase
     name: retrieval-strategist
     options: |
-      - inherit: treckba-retrieval.retrieval.periodically-valid-caching-query-test
-#      - inherit: treckba-retrieval.retrieval.simple-caching-query-test
+      - inherit: treckba-retrieval.retrieval.simple-caching-query-test
+#      - inherit: treckba-retrieval.retrieval.periodically-valid-caching-query-test
 
   - inherit: ecd.phase
     name: rescale
@@ -40,7 +40,7 @@ pipeline:
       - inherit: treckba-retrieval.filter.threshold
 
   - inherit: treckba-retrieval.eval.retrieval-trace-evaluator-aggregator
-    relevance-level: RELEVANCE
+    relevance-level: RELEVANCE # CENTRAL
 
 post-process:
   - inherit: jdbc.eval.retrieval-evaluator-consumer
