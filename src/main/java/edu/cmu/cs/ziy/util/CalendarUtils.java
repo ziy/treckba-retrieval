@@ -56,6 +56,13 @@ public class CalendarUtils {
     return df.format(calendar.getTime());
   }
 
+  public static String toGmtString(Calendar calendar, String dateFormatPattern)
+          throws ParseException {
+    DateFormat df = new SimpleDateFormat(dateFormatPattern);
+    df.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return df.format(calendar.getTime());
+  }
+
   public static String rangeToString(Range<Calendar> range, String dateFormatPattern)
           throws ParseException {
     Range<String> rangeStrings = Range.range(

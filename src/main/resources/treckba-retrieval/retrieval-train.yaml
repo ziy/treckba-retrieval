@@ -1,0 +1,34 @@
+configuration: 
+  name: treckba-retrieval
+  author: ziy
+
+persistence-provider:
+  inherit: treckba-retrieval.persistence.local-persistence-provider
+
+collection-reader:
+  inherit: treckba-retrieval.collection.treckba-topic-collection-reader
+  decorators: |
+    - inherit: treckba-retrieval.collection.retrieval-gs-decorator-test
+
+pipeline:
+  - inherit: ecd.phase
+    name: keyterm-extractor
+    options: |
+      - inherit: treckba-retrieval.keyterm.simple
+#      - inherit: treckba-retrieval.keyterm.wikipedia-expanded
+
+  - inherit: ecd.phase
+    name: keyterm-update
+    options: |
+      - inherit: treckba-retrieval.keyterm.lucene-escape
+      
+  - inherit: ecd.phase
+    name: retrieval-strategist
+    options: |
+      - inherit: treckba-retrieval.retrieval.simple-caching-query-train
+#      - inherit: treckba-retrieval.retrieval.periodically-valid-caching-query-train
+
+  - inherit: ecd.phase
+    name: train-classifier
+    options: |
+      - inherit: treckba-retrieval.classify.topic-specific

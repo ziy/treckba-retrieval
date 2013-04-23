@@ -1,0 +1,9 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.retrieval.SimpleCachingQueryRetrievalStrategist
+start-date: 2011-10-07-14
+end-date: 2012-01-01-00
+cache-file: retrieval-cache/cache.db3
+cross-opts:
+  quote: [true] # [true, false]
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider

@@ -39,6 +39,7 @@ public class IdsFileGenerator {
         ids.add(pair.getId());
       }
     }
-    Files.write(Joiner.on('\n').join(ids), new File("retrieval-cache/ids.small"), Charsets.UTF_8);
+    Files.write(Joiner.on('\n').join(ids), new File("retrieval-cache/ids.small.quote"),
+            Charsets.UTF_8);
   }
 }

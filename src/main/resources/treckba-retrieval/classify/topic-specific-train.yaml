@@ -1,0 +1,7 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.classify.TopicSpecificClassifier#Trainer
+model-dir: model
+wiki-cache-dir: ../treckba-preprocess/keyterm-cache/
+id-to-text-file: text-cache/id2text
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider

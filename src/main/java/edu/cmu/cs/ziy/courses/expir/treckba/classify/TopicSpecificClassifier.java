@@ -1,34 +1,43 @@
 package edu.cmu.cs.ziy.courses.expir.treckba.classify;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 
+import similarity.AverageKLDivergence;
+import similarity.CosineSimilarity;
+import similarity.EuclideanDistance;
+import similarity.JaccardCoefficient;
+import similarity.KLDivergence;
+import similarity.MatchingCoefficient;
+import similarity.ModifiedOverlapCoefficient;
+import similarity.PearsonCorrelationCoefficient;
+import similarity.Similarity;
+import util.SimilarityUtils;
+
 import com.google.common.base.Objects;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import com.google.common.collect.SetMultimap;
 
 import edu.cmu.cs.ziy.courses.expir.treckba.view.TrecKbaViewType;
 import edu.cmu.cs.ziy.util.CalendarUtils;
-import edu.cmu.cs.ziy.wiki.article.ExpandedWikipediaArticle;
+import edu.cmu.cs.ziy.util.classifier.Feature;
+import edu.cmu.cs.ziy.util.classifier.Instance;
+import edu.cmu.cs.ziy.util.classifier.RealValuedFeature;
+import edu.cmu.cs.ziy.util.classifier.StanfordNLPClassifier;
 import edu.cmu.cs.ziy.wiki.article.WikipediaArticleCache;
+import edu.cmu.lti.oaqa.cse.basephase.retrieval.AbstractRetrievalUpdater;
 import edu.cmu.lti.oaqa.ecd.log.AbstractLoggedComponent;
 import edu.cmu.lti.oaqa.framework.BaseJCasHelper;
 import edu.cmu.lti.oaqa.framework.ViewManager;
@@ -42,9 +51,9 @@ public class TopicSpecificClassifier {
 
   private static final String MODEL_DIR_PROPERTY = "treckba-retrieval.classifier.model-dir";
 
-  private static final String CACHE_DIR_PROPERTY = "treckba-retrieval.classifier.cache-dir";
+  private static final String WIKI_CACHE_DIR_PROPERTY = "treckba-retrieval.classifier.wiki-cache-dir";
 
-  private static final String INDEX_ROOT_PROPERTY = "treckba-retrieval.classifier.index-root";
+  private static final String ID_TO_TEXT_FILE_PROPERTY = "treckba-retrieval.classifier.id-to-text-file";
 
   private static final String earliestTimeStr = "2011-10-07-14";
 
@@ -66,23 +75,39 @@ public class TopicSpecificClassifier {
     }
   }
 
+  private static final Similarity[] sims = new Similarity[] { new CosineSimilarity(),
+      new KLDivergence(), new JaccardCoefficient(), new PearsonCorrelationCoefficient(),
+      new EuclideanDistance(EuclideanDistance.INVERSE_OF_DISTANCE_PLUS_ONE),
+      new EuclideanDistance(EuclideanDistance.EXPONENTIAL_OF_NEGATIVE_DISTANCE),
+      new MatchingCoefficient(), new ModifiedOverlapCoefficient(), new AverageKLDivergence() };
+
   public static class Trainer extends AbstractLoggedComponent {
 
-    private File classifierDir;
+    private File classifierModelDir;
 
-    private File cacheDir;
+    private File wikiCacheDir;
 
-    private File indexRoot;
+    private Map<String, String> id2text;
 
+    @SuppressWarnings("unchecked")
     @Override
     public void initialize(UimaContext context) throws ResourceInitializationException {
       super.initialize(context);
-      classifierDir = new File(Objects.firstNonNull(System.getProperty(MODEL_DIR_PROPERTY),
+      classifierModelDir = new File(Objects.firstNonNull(System.getProperty(MODEL_DIR_PROPERTY),
               (String) context.getConfigParameterValue("model-dir")));
-      cacheDir = new File(Objects.firstNonNull(System.getProperty(CACHE_DIR_PROPERTY),
-              (String) context.getConfigParameterValue("cache-dir")));
-      indexRoot = new File(Objects.firstNonNull(System.getProperty(INDEX_ROOT_PROPERTY),
-              (String) context.getConfigParameterValue("index-root")));
+      wikiCacheDir = new File(Objects.firstNonNull(System.getProperty(WIKI_CACHE_DIR_PROPERTY),
+              (String) context.getConfigParameterValue("wiki-cache-dir")));
+      File id2textFile = new File(Objects.firstNonNull(
+              System.getProperty(ID_TO_TEXT_FILE_PROPERTY),
+              (String) context.getConfigParameterValue("id-to-text-file")));
+      // prepare target
+      try {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(id2textFile));
+        id2text = (Map<String, String>) ois.readObject();
+        ois.close();
+      } catch (Exception e) {
+        throw new ResourceInitializationException(e);
+      }
     }
 
     @Override
@@ -95,10 +120,13 @@ public class TopicSpecificClassifier {
         List<RetrievalResult> documents = RetrievalResultArray.retrieveRetrievalResults(ViewManager
                 .getDocumentView(jcas));
         // prepare gs
-        List<RetrievalResult> gs = RetrievalResultArray.retrieveRetrievalResults(ViewManager
-                .getView(jcas, TrecKbaViewType.DOCUMENT_GS_CENTRAL));
+        List<String> gsIds = Lists.newArrayList();
+        for (RetrievalResult gs : RetrievalResultArray.retrieveRetrievalResults(ViewManager
+                .getView(jcas, TrecKbaViewType.DOCUMENT_GS_CENTRAL))) {
+          gsIds.add(gs.getDocID());
+        }
         // do task
-        trainRetrieval(input.getQuestion(), keyterms, documents, gs);
+        trainRetrieval(input.getQuestion(), keyterms, documents, gsIds);
         // save output
         RetrievalResultArray.storeRetrievalResults(ViewManager.getDocumentView(jcas), documents);
       } catch (Exception e) {
@@ -107,42 +135,65 @@ public class TopicSpecificClassifier {
     }
 
     private void trainRetrieval(String question, List<Keyterm> keyterms,
-            List<RetrievalResult> documents, List<RetrievalResult> gs)
-            throws ClassNotFoundException, IOException, ParseException {
+            List<RetrievalResult> documents, List<String> gsIds) throws ClassNotFoundException,
+            IOException, ParseException {
       // prepare source
-      WikipediaArticleCache.loadCache(new File(cacheDir, question));
+      WikipediaArticleCache.loadCache(new File(wikiCacheDir, question));
       if (question.equals("William_H._Gates,_Sr")) {
         question = "William_H._Gates,_Sr.";
       }
       String title = question.replace('_', ' ');
       String article = WikipediaArticleCache.loadExpandedArticle(title, period, null, null)
               .getValueAt(criticalTime);
-      // prepare target
-      Map<RetrievalResult, String> doc2dir = Maps.newHashMap();
-      SetMultimap<String, RetrievalResult> dir2docs = HashMultimap.create();
+      HashMap<String, Double> articleWordCount = SimilarityUtils.countWord(article);
+      // add positive instance
+      List<Instance> instances = Lists.newArrayList();
       for (RetrievalResult document : documents) {
-        Calendar docTime = Calendar.getInstance();
-        docTime.setTimeInMillis(Long.parseLong(document.getDocID().substring(0, 10)) * 1000);
-        String dir = CalendarUtils.toString(docTime, CalendarUtils.YMDH_FORMAT);
-        doc2dir.put(document, dir);
-        dir2docs.put(dir, document);
-      }
-      Map<RetrievalResult, String> doc2text = Maps.newHashMap();
-      for (String dir : dir2docs.keySet()) {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(indexRoot, dir)));
-        IndexSearcher searcher = new IndexSearcher(reader);
-        for (RetrievalResult doc : dir2docs.get(dir)) {
-          TermQuery query = new TermQuery(new Term("stream-id", doc.getDocID()));
-          ScoreDoc[] hits = searcher.search(query, 1).scoreDocs;
-          doc2text.put(doc, searcher.doc(hits[0].doc).getField("body").stringValue());
+        String id = document.getDocID();
+        if (gsIds.contains(id) && id2text.containsKey(id)) {
+          HashMap<String, Double> textWordCount = SimilarityUtils.countWord(id2text.get(id));
+          instances.add(new Instance(Boolean.TRUE, extractFeatures(articleWordCount, textWordCount,
+                  document.getProbability())));
         }
-        reader.close();
       }
-      // similarity
-      
+      System.out.println("Pos: " + instances.size());
+      // add negative instance after sampling
+      float ratio = (float) instances.size() / (documents.size() - instances.size());
+      for (RetrievalResult document : documents) {
+        String id = document.getDocID();
+        if (!gsIds.contains(id) && Math.random() < ratio && id2text.containsKey(id)) {
+          HashMap<String, Double> textWordCount = SimilarityUtils.countWord(id2text.get(id));
+          instances.add(new Instance(Boolean.FALSE, extractFeatures(articleWordCount,
+                  textWordCount, document.getProbability())));
+        }
+      }
+      System.out.println("Pos: " + instances.size());
       // train
-
+      StanfordNLPClassifier classifier = new StanfordNLPClassifier();
+      classifier.train(instances);
+      classifier.saveModel(new File(classifierModelDir, question));
     }
+
   }
 
+  public static class Predictor extends AbstractRetrievalUpdater {
+
+    @Override
+    protected List<RetrievalResult> updateDocuments(String question, List<Keyterm> keyterms,
+            List<RetrievalResult> documents) {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+  }
+
+  private static List<Feature> extractFeatures(HashMap<String, Double> articleWordCount,
+          HashMap<String, Double> textWordCount, float luceneScore) {
+    List<Feature> features = Lists.newArrayList();
+    features.add(new RealValuedFeature(luceneScore));
+    for (Similarity sim : sims) {
+      features.add(new RealValuedFeature(sim.getSimilarity(articleWordCount, textWordCount)));
+    }
+    return features;
+  }
 }
