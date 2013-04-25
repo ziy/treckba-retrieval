@@ -34,7 +34,7 @@ public class InlinkAnchorTextExpander extends AbstractValidationFreeExpander imp
     for (String inlink : Collections2.filter(
             Arrays.asList(wiki.whatLinksHere(originalEntity, Wiki.MAIN_NAMESPACE)),
             new WikipediaNamespacePredicate(wiki, Wiki.MAIN_NAMESPACE))) {
-      WikipediaArticle article = WikipediaArticleCache.loadArticle(inlink, period, wiki);
+      WikipediaArticle article = WikipediaArticleCache.getArticle(inlink, period, wiki);
       for (Entry<Range<Calendar>, String> periodContent : article.getPeriodicContentPairs()) {
         Matcher matcher = pattern.matcher(periodContent.getValue());
         while (matcher.find()) {

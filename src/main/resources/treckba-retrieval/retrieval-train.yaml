@@ -8,7 +8,7 @@ persistence-provider:
 collection-reader:
   inherit: treckba-retrieval.collection.treckba-topic-collection-reader
   decorators: |
-    - inherit: treckba-retrieval.collection.retrieval-gs-decorator-test
+    - inherit: treckba-retrieval.collection.retrieval-gs-decorator-train
 
 pipeline:
   - inherit: ecd.phase
@@ -21,7 +21,7 @@ pipeline:
     name: keyterm-update
     options: |
       - inherit: treckba-retrieval.keyterm.lucene-escape
-      
+
   - inherit: ecd.phase
     name: retrieval-strategist
     options: |
@@ -31,4 +31,28 @@ pipeline:
   - inherit: ecd.phase
     name: train-classifier
     options: |
-      - inherit: treckba-retrieval.classify.topic-specific
+      - inherit: treckba-retrieval.classify.logistic-topic-specific-train
+      - inherit: treckba-retrieval.classify.libsvm-topic-specific-train
+      - inherit: treckba-retrieval.classify.nb-logreg-topic-specific-train
+      - inherit: base.noop
+
+  - inherit: ecd.phase
+    name: rescale
+    options: |
+      - inherit: treckba-retrieval.rescale.constant
+#      - inherit: treckba-retrieval.rescale.minmax
+
+  - inherit: ecd.phase
+    name: filter
+    options: |
+      - inherit: treckba-retrieval.filter.threshold
+
+  - inherit: treckba-retrieval.eval.retrieval-trace-evaluator-aggregator
+    relevance-level: RELEVANCE # CENTRAL
+
+post-process:
+  - inherit: jdbc.eval.retrieval-evaluator-consumer
+
+  - inherit: report.csv-report-generator
+    builders: |
+      - inherit: jdbc.report.f-measure-report-component

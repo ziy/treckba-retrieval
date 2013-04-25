@@ -1,0 +1,8 @@
+inherit: treckba-retrieval.classify.topic-specific-train
+classpath: edu.cmu.cs.ziy.util.classifier.StanfordNLPClassifier
+cross-opts:
+  properties:
+    - useClassFeature=true;useNB=true;prior=no
+    - useClassFeature=true;useNB=false;prior=no
+    - useClassFeature=true;useNB=true;prior=quadratic
+    - useClassFeature=true;useNB=false;prior=quadratic

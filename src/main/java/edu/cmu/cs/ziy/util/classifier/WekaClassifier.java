@@ -13,14 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import weka.classifiers.Classifier;
+import com.google.common.collect.Lists;
+
 import weka.core.Attribute;
-import weka.core.FastVector;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 
 public class WekaClassifier extends AbstractClassifier {
 
-  protected Classifier classifier;
+  protected weka.classifiers.AbstractClassifier classifier;
 
   private List<String> options;
 
@@ -50,10 +51,10 @@ public class WekaClassifier extends AbstractClassifier {
     if (instance.getLabelString() != null) {
       att[i] = trainSet.classAttribute().indexOfValue(instance.getLabelString());
     }
-    return new weka.core.Instance(1.0, att);
+    return new DenseInstance(1.0, att);
   }
 
-  public WekaClassifier(Class<? extends Classifier> classifier) {
+  public WekaClassifier(Class<? extends weka.classifiers.AbstractClassifier> classifier) {
     try {
       this.classifier = classifier.newInstance();
     } catch (InstantiationException e) {
@@ -79,21 +80,21 @@ public class WekaClassifier extends AbstractClassifier {
   public void setFeatureTypes(List<Feature> features) {
     // add features to attributes
     numFeatures = features.size();
-    FastVector atts = new FastVector(numFeatures + 1);
+    ArrayList<Attribute> atts = Lists.newArrayList();
     for (int i = 0; i < numFeatures; i++) {
       switch (features.get(i).getType()) {
         case REAL_VALUED:
-          atts.addElement(new Attribute(i + ":" + Instance.getFeatureName(i)));
+          atts.add(new Attribute(i + ":" + Instance.getFeatureName(i)));
           break;
         case STRING:
         case BINARY:
           // convert string features to nominal features
           Set<Feature> values = Instance.getFeatureValues(i);
-          FastVector nominals = new FastVector(values.size());
+          List<String> nominals = Lists.newArrayList();
           for (Feature feature : values) {
-            nominals.addElement(feature.getValue());
+            nominals.add(feature.getValue());
           }
-          atts.addElement(new Attribute(i + ":" + Instance.getFeatureName(i), nominals));
+          atts.add(new Attribute(i + ":" + Instance.getFeatureName(i), nominals));
           break;
         case BINNED_VALUED:
           break;
@@ -101,11 +102,11 @@ public class WekaClassifier extends AbstractClassifier {
     }
     // add label to the attributes
     Set<Object> labels = Instance.getLabelValues();
-    FastVector nominals = new FastVector(labels.size());
+    List<String> nominals = Lists.newArrayList();
     for (Object label : labels) {
-      nominals.addElement(label.toString());
+      nominals.add(label.toString());
     }
-    atts.addElement(new Attribute("label", nominals));
+    atts.add(new Attribute("label", nominals));
     // create training set container
     trainSet = new Instances("training", atts, 0);
     trainSet.setClassIndex(numFeatures);
@@ -165,7 +166,7 @@ public class WekaClassifier extends AbstractClassifier {
   public void loadModel(File modelFile) throws IOException {
     ObjectInputStream ois = new ObjectInputStream(new FileInputStream(modelFile));
     try {
-      classifier = (Classifier) ois.readObject();
+      classifier = (weka.classifiers.AbstractClassifier) ois.readObject();
       trainSet = (Instances) ois.readObject();
       idx2label = (String[]) ois.readObject();
     } catch (ClassNotFoundException e) {

@@ -21,12 +21,25 @@ pipeline:
     name: keyterm-update
     options: |
       - inherit: treckba-retrieval.keyterm.lucene-escape
-      
+
   - inherit: ecd.phase
     name: retrieval-strategist
     options: |
       - inherit: treckba-retrieval.retrieval.simple-caching-query-test
 #      - inherit: treckba-retrieval.retrieval.periodically-valid-caching-query-test
+
+  - inherit: ecd.phase
+    name: train-classifier
+    options: |
+      - inherit: treckba-retrieval.classify.logistic-topic-specific-test
+      - inherit: treckba-retrieval.classify.libsvm-topic-specific-test
+      - inherit: treckba-retrieval.classify.nb-logreg-topic-specific-test
+      - inherit: base.noop
+
+  - inherit: ecd.phase
+    name: score-combiner
+    options: |
+      - inherit: treckba-retrieval.classify.score-combine
 
   - inherit: ecd.phase
     name: rescale

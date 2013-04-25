@@ -27,10 +27,10 @@ public class IdsFileGenerator {
     // new FirstFieldGetter()));
     // }
     queries.addAll(Collections2.transform(
-            Files.readLines(new File("retrieval-cache/queries/1365442877841"), Charsets.UTF_8),
+            Files.readLines(new File("retrieval-cache/queries/1365442877843"), Charsets.UTF_8),
             new FirstFieldGetter()));
     SqliteCacher<ArrayList<IdScorePair>> cache = SqliteCacher.open(new File(
-            "retrieval-cache/cache.db3"));
+            "retrieval-cache/cache.db3.small"));
     Set<String> ids = Sets.newHashSet();
     int i = 0;
     for (String query : queries) {
@@ -39,7 +39,7 @@ public class IdsFileGenerator {
         ids.add(pair.getId());
       }
     }
-    Files.write(Joiner.on('\n').join(ids), new File("retrieval-cache/ids.small.quote"),
+    Files.write(Joiner.on('\n').join(ids), new File("retrieval-cache/1365442877843-small.ids"),
             Charsets.UTF_8);
   }
 }

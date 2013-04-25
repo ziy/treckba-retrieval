@@ -11,12 +11,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.FSDirectory;
 
 import com.google.common.base.Charsets;
@@ -44,16 +47,20 @@ public class BodyCacher {
     Map<String, String> id2text = Maps.newHashMap();
     for (String dir : dirs) {
       System.out.println(dir);
+      if (dir2ids.get(dir) == null || dir2ids.get(dir).size() == 0) {
+        continue;
+      }
       IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(indexRoot, dir)));
       IndexSearcher searcher = new IndexSearcher(reader);
+      BooleanQuery query = new BooleanQuery();
+      query.setMinimumNumberShouldMatch(1);
       for (String id : dir2ids.get(dir)) {
-        TermQuery query = new TermQuery(new Term("stream-id", id));
-        ScoreDoc[] hits = searcher.search(query, 1).scoreDocs;
-        try {
-          id2text.put(id, searcher.doc(hits[0].doc).getField("body").stringValue());
-        } catch (ArrayIndexOutOfBoundsException e) {
-          System.out.println(dir + " " + id);
-        }
+        query.add(new TermQuery(new Term("stream-id", id)), Occur.SHOULD);
+      }
+      ScoreDoc[] hits = searcher.search(query, dir2ids.get(dir).size()).scoreDocs;
+      for (ScoreDoc hit : hits) {
+        Document doc = searcher.doc(hit.doc);
+        id2text.put(doc.getField("stream-id").stringValue(), doc.getField("body").stringValue());
       }
       reader.close();
     }

@@ -1,0 +1,3 @@
+inherit: treckba-retrieval.classify.topic-specific-train
+classpath: edu.cmu.cs.ziy.util.classifier.LogisticClassifier
+properties: M=1000

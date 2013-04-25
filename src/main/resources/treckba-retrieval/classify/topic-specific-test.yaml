@@ -1,4 +1,4 @@
-class: edu.cmu.cs.ziy.courses.expir.treckba.classify.TopicSpecificClassifier$Trainer
+class: edu.cmu.cs.ziy.courses.expir.treckba.classify.TopicSpecificClassifier$Predictor
 model-root: model
 wiki-cache-dir: ../treckba-preprocess/keyterm-cache/
 id-to-text-file: text-cache/1365442877843-small.id2text
