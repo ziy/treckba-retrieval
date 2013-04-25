@@ -84,14 +84,24 @@
       <version>2.1.4</version>
     </dependency>
     <dependency>
-      <groupId>nz.ac.waikato.cs</groupId>
-      <artifactId>weka</artifactId>
-      <version>3.6.6</version>
+      <groupId>edu.cmu.cs.ziy.util</groupId>
+      <artifactId>similarity-library</artifactId>
+      <version>0.0.1</version>
     </dependency>
     <dependency>
-      <groupId>edu.cmu.lti.oaqa.bio.test</groupId>
-      <artifactId>similarity</artifactId>
-      <version>0.0.1</version>
+      <groupId>nz.ac.waikato.cms.weka</groupId>
+      <artifactId>LibSVM</artifactId>
+      <version>1.0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>tw.edu.ntu.csie</groupId>
+      <artifactId>libsvm</artifactId>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>nz.ac.waikato.cms.weka</groupId>
+      <artifactId>weka-stable</artifactId>
+      <version>3.6.9</version>
     </dependency>
   </dependencies>
   <properties>
@@ -234,10 +244,10 @@
       </build>
     </profile>
     <profile>
-      <id>train-classifier</id>
+      <id>train</id>
       <activation>
         <property>
-          <name>train-classifier</name>
+          <name>train</name>
         </property>
       </activation>
       <build>

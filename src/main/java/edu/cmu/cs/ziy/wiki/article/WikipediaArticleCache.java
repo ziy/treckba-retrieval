@@ -48,7 +48,7 @@ public class WikipediaArticleCache {
     oos.close();
   }
 
-  public static WikipediaArticle loadArticle(String title, Range<Calendar> period, Wiki wiki)
+  public static WikipediaArticle getArticle(String title, Range<Calendar> period, Wiki wiki)
           throws IOException {
     WikipediaArticle article;
     if (articleCache.contains(title, period)) {
@@ -62,7 +62,7 @@ public class WikipediaArticleCache {
   }
 
   // DONE Need to include expanded keyterms
-  public static ExpandedWikipediaArticle loadExpandedArticle(String title, Range<Calendar> period,
+  public static ExpandedWikipediaArticle getExpandedArticle(String title, Range<Calendar> period,
           WikipediaEntityExpander[] expanders, Wiki wiki) throws IOException {
     ExpandedWikipediaArticle expandedArticle;
     if (expandedArticleCache.contains(title, period)) {

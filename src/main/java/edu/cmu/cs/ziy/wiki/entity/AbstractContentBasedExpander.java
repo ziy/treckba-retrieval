@@ -28,7 +28,7 @@ public abstract class AbstractContentBasedExpander extends AbstractValidationFre
   public Set<WikipediaEntity> generateEntities(String originalEntity, Range<Calendar> period,
           Wiki wiki) throws IOException {
     Pattern pattern = Pattern.compile(getTextExtractionPattern());
-    WikipediaArticle article = WikipediaArticleCache.loadArticle(originalEntity, period, wiki);
+    WikipediaArticle article = WikipediaArticleCache.getArticle(originalEntity, period, wiki);
     Map<String, WikipediaEntity> anchor2entity = Maps.newHashMap();
     for (Entry<Range<Calendar>, String> periodContent : article.getPeriodicContentPairs()) {
       Matcher matcher = pattern.matcher(periodContent.getValue());

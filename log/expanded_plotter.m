@@ -1,0 +1,18 @@
+data = importdata('expanded.csv');
+data = data.data;
+labels = data(9:2:21, 2)
+mat = reshape(data(:, 5), 21, 64)
+subplot(1,3,1),plot(0:50:1000, mat)
+axis([400,1000,0,1])
+set(gca,'XTick',400:100:1000), set(gca,'XTickLabel',labels)
+title('(a) F-1')
+mat = reshape(data(:, 3), 21, 64)
+subplot(1,3,2),plot(0:50:1000, mat)
+axis([400,1000,0,1])
+set(gca,'XTick',400:100:1000), set(gca,'XTickLabel',labels)
+title('(b) P')
+mat = reshape(data(:, 4), 21, 64)
+subplot(1,3,3),plot(0:50:1000, mat)
+axis([400,1000,0,1])
+set(gca,'XTick',400:100:1000), set(gca,'XTickLabel',labels)
+title('(c) R')

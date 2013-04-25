@@ -1,0 +1,57 @@
+590.578 M -> 84.920 M
+
+Satoshi Ishii	42413	5201
+Jim Steyer	475647	1465
+Alexander McCall Smith	493464	22764
+"Basic Element"	10954	9534
+"Nassim Nicholas Taleb"	1994	1978
+"Satoshi Ishii"	1896	1881
+Vladimir Potanin	375674	14634
+Nassim Nicholas Taleb	338363	4372
+Basic Element	492769	36023
+James McCartney	493319	80918
+Douglas Carswell	400938	8485
+"Alexander McCall Smith"	3120	3086
+Bill Coen	493334	6450
+"Boris Berezovsky"	3897	3858
+"Annie Laurie Gaylor"	1251	1243
+Frederick M. Lawrence	493609	34395
+"Roustam Tariko"	351	337
+"Alex Kapranos"	581	573
+Annie Laurie Gaylor	422498	7717
+Darren Rowse	321457	5633
+Mario Garnero	429237	4806
+"Lovebug Starski"	65	63
+Charlie Savage	467981	51814
+"Ruth Rendell"	1266	1232
+"Jim Steyer"	47	44
+Aharon Barak	82006	5087
+Masaru Emoto	28951	2302
+"Lisa Bloom"	834	716
+"Aharon Barak"	558	548
+"Charlie Savage"	2306	1990
+"Vladimir Potanin"	524	513
+Ruth Rendell	396505	27042
+Ikuhisa Minowa	1243	869
+"Ikuhisa Minowa"	653	652
+"William D. Cohan"	874	827
+Alex Kapranos	470839	2635
+"Frederick M. Lawrence"	24	24
+William Cohen	488965	77709
+"William H. Gates, Sr."	668	667
+William D. Cohan	493670	4890
+"Rodrigo Pimentel"	540	538
+"Bill Coen"	223	212
+Lovebug Starski	652	151
+"Masaru Emoto"	1087	1083
+"Darren Rowse"	3201	3135
+"William Cohen"	1303	1097
+"Douglas Carswell"	2779	2619
+Lisa Bloom	490119	61780
+William H. Gates, Sr.	493696	12326
+"James McCartney"	2182	2118
+Rodrigo Pimentel	150453	20000
+"Mario Garnero"	373	370
+Boris Berezovsky	191435	6865
+Roustam Tariko	527	369
+
