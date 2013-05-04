@@ -31,10 +31,15 @@ pipeline:
   - inherit: ecd.phase
     name: train-classifier
     options: |
-      - inherit: treckba-retrieval.classify.logistic-topic-specific-test
       - inherit: treckba-retrieval.classify.libsvm-topic-specific-test
-      - inherit: treckba-retrieval.classify.nb-logreg-topic-specific-test
-      - inherit: base.noop
+      - inherit: treckba-retrieval.classify.libsvm-topic-independent-test
+#      - inherit: treckba-retrieval.classify.random-forest-topic-specific-test
+#      - inherit: treckba-retrieval.classify.random-forest-topic-independent-test
+#      - inherit: treckba-retrieval.classify.logistic-topic-specific-test
+#      - inherit: treckba-retrieval.classify.logistic-topic-independent-test
+#      - inherit: treckba-retrieval.classify.nb-logreg-topic-specific-test
+#      - inherit: treckba-retrieval.classify.nb-logreg-topic-independent-test
+#      - inherit: base.noop
 
   - inherit: ecd.phase
     name: score-combiner

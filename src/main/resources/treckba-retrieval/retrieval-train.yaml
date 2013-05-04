@@ -31,10 +31,11 @@ pipeline:
   - inherit: ecd.phase
     name: train-classifier
     options: |
-      - inherit: treckba-retrieval.classify.logistic-topic-specific-train
-      - inherit: treckba-retrieval.classify.libsvm-topic-specific-train
-      - inherit: treckba-retrieval.classify.nb-logreg-topic-specific-train
-      - inherit: base.noop
+      - inherit: treckba-retrieval.classify.libsvm-topic-specific-independent-train
+#      - inherit: treckba-retrieval.classify.random-forest-topic-specific-independent-train
+#      - inherit: treckba-retrieval.classify.logistic-topic-specific-independent-train
+#      - inherit: treckba-retrieval.classify.nb-logreg-topic-specific-independent-train
+#      - inherit: base.noop
 
   - inherit: ecd.phase
     name: rescale

@@ -1,7 +1,0 @@
-inherit: treckba-retrieval.classify.topic-specific-train
-classpath: edu.cmu.cs.ziy.util.classifier.LibSvmClassifier
-cross-opts:
-  properties:
-    - K=0
-    - K=1
-    - K=2
