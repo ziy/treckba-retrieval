@@ -31,8 +31,13 @@ public abstract class AbstractDocumentClassifierTrainer extends AbstractTrainerP
               .getDocumentView(jcas));
       // prepare gs
       List<String> gsIds = Lists.newArrayList();
-      for (RetrievalResult gs : RetrievalResultArray.retrieveRetrievalResults(ViewManager.getView(
-              jcas, TrecKbaViewType.DOCUMENT_GS_RELEVANT))) {
+      JCas view = null;
+      if (gsRelevance.equals(GsRelevance.RELEVANT)) {
+        view = ViewManager.getView(jcas, TrecKbaViewType.DOCUMENT_GS_RELEVANT);
+      } else if (gsRelevance.equals(GsRelevance.CENTRAL)) {
+        view = ViewManager.getView(jcas, TrecKbaViewType.DOCUMENT_GS_CENTRAL);
+      }
+      for (RetrievalResult gs : RetrievalResultArray.retrieveRetrievalResults(view)) {
         gsIds.add(gs.getDocID());
       }
       // do task

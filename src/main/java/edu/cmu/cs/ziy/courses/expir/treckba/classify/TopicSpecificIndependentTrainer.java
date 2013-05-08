@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 
@@ -24,7 +24,7 @@ import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
 public class TopicSpecificIndependentTrainer extends AbstractDocumentClassifierTrainer {
 
   protected List<Instance> allInstances = Lists.newArrayList();
-  
+
   protected void trainRetrieval(String question, List<Keyterm> keyterms,
           List<RetrievalResult> documents, List<String> gsIds) throws ClassNotFoundException,
           IOException, ParseException, InstantiationException, IllegalAccessException {
@@ -80,7 +80,7 @@ public class TopicSpecificIndependentTrainer extends AbstractDocumentClassifierT
       updateDocument(document, id2text, articleWordCount, classifier);
     }
   }
-  
+
   @Override
   public void collectionProcessComplete() throws AnalysisEngineProcessException {
     super.collectionProcessComplete();

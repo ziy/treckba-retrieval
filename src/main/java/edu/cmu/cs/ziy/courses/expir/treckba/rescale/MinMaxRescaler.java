@@ -14,45 +14,45 @@ import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
 
 public class MinMaxRescaler extends AbstractRescaler {
 
-  private static final String MIN_PROPERTY = "treckba-retrieval.rescale.min";
+  private static final String Y_MIN_PROPERTY = "treckba-retrieval.rescale.y-min";
 
-  private static final String MAX_PROPERTY = "treckba-retrieval.rescale.max";
+  private static final String Y_MAX_PROPERTY = "treckba-retrieval.rescale.y-max";
 
-  private float min;
+  private float yMin;
 
-  private float max;
+  private float yMax;
 
   @Override
   public void initialize(UimaContext context) throws ResourceInitializationException {
     super.initialize(context);
-    min = Objects.firstNonNull(
-            Floats.tryParse(Strings.nullToEmpty(System.getProperty(MIN_PROPERTY))),
-            (Float) context.getConfigParameterValue("min"));
-    max = Objects.firstNonNull(
-            Floats.tryParse(Strings.nullToEmpty(System.getProperty(MAX_PROPERTY))),
-            (Float) context.getConfigParameterValue("max"));
+    yMin = Objects.firstNonNull(
+            Floats.tryParse(Strings.nullToEmpty(System.getProperty(Y_MIN_PROPERTY))),
+            (Float) context.getConfigParameterValue("y-min"));
+    yMax = Objects.firstNonNull(
+            Floats.tryParse(Strings.nullToEmpty(System.getProperty(Y_MAX_PROPERTY))),
+            (Float) context.getConfigParameterValue("y-max"));
   }
 
   @Override
   protected List<RetrievalResult> rescale(List<RetrievalResult> documents) {
-    float lowerbound = Float.POSITIVE_INFINITY;
-    float upperbound = Float.NEGATIVE_INFINITY;
+    float xMin = Float.POSITIVE_INFINITY;
+    float xMax = Float.NEGATIVE_INFINITY;
     for (RetrievalResult document : documents) {
       float score = document.getProbability();
-      if (score < lowerbound) {
-        lowerbound = score;
+      if (score < xMin) {
+        xMin = score;
       }
-      if (score > upperbound) {
-        upperbound = score;
+      if (score > xMax) {
+        xMax = score;
       }
     }
-    float rescale = (max - min) / (upperbound - lowerbound);
+    float rescale = (yMax - yMin) / (xMax - xMin);
     List<RetrievalResult> newDocuments = Lists.newArrayList();
     for (RetrievalResult document : documents) {
-      float score = bound((document.getProbability() - lowerbound) * rescale + min, min, max);
+      float score = bound((document.getProbability() - xMin) * rescale + yMin, yMin, yMax);
       newDocuments.add(new RetrievalResult(document.getDocID(), score, document.getQueryString()));
     }
-    log("RESCALE: " + rescale + ", MIN: " + lowerbound + ", MAX: " + upperbound);
+    log("RESCALE: " + rescale + ", x-min: " + xMin + ", x-max: " + xMax);
     return newDocuments;
   }
 

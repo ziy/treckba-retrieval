@@ -38,6 +38,11 @@ pipeline:
 #      - inherit: base.noop
 
   - inherit: ecd.phase
+    name: train-classifier
+    options: |
+      - inherit: treckba-retrieval.rescale.threshold-train
+
+  - inherit: ecd.phase
     name: rescale
     options: |
       - inherit: treckba-retrieval.rescale.constant
