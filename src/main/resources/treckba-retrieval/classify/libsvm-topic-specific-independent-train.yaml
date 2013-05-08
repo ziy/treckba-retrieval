@@ -5,4 +5,5 @@ cross-opts:
     - K=0
 #    - K=1
 #    - K=2
-  background-negative: [true, false]
+  background-negative: [true] # [true, false]
+  gs-relevance: [RELEVANT] # [CENTRAL, RELEVANT]

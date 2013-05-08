@@ -1,0 +1,13 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.rescale.ThresholdCurveRescaling
+gs-relevance: RELEVANT
+dir: threshold
+y-min: 0.0
+y-max: 1000.0
+x-min: -0.01
+x-max: 2.5
+y-threshold: 500.0
+cross-opts:
+  weight: [0.0, 0.25, 0.5, 0.75, 1.0]
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider

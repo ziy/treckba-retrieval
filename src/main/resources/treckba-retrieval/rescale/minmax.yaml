@@ -1,6 +1,6 @@
 class: edu.cmu.cs.ziy.courses.expir.treckba.rescale.MinMaxRescaler
-min: 0.0
-max: 1000.0
+y-min: 0.0
+y-max: 1000.0
 
 persistence-provider: |
   inherit: ecd.default-log-persistence-provider

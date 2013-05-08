@@ -1,9 +1,9 @@
 class: edu.cmu.cs.ziy.courses.expir.treckba.rescale.ConstantRescaler
-min: 0.0
-max: 1000.0
-lowerbound: 0.0
+y-min: 0.0
+y-max: 1000.0
+x-min: 0.0
 cross-opts:
-  upperbound: [1.0] # [0.5, 1.0, 2.0]
+  x-max: [1.0] # [0.5, 1.0, 2.0]
 
 persistence-provider: |
   inherit: ecd.default-log-persistence-provider

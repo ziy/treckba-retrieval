@@ -50,6 +50,12 @@ public class AbstractTrainerPredictor extends AbstractLoggedComponent {
 
   private static final String BACKGROUND_NEGATIVE_PROPERTY = "treckba-retrieval.classifier.background-negative";
 
+  private static final String GS_RELEVANCE_PROPERTY = "treckba-retrieval.classifier.gs-relevance";
+
+  protected static enum GsRelevance {
+    CENTRAL, RELEVANT
+  }
+
   protected File classifierModelDir;
 
   protected File wikiCacheDir;
@@ -64,10 +70,13 @@ public class AbstractTrainerPredictor extends AbstractLoggedComponent {
 
   protected boolean backgroundNegative = false;
 
+  protected GsRelevance gsRelevance;
+
   @SuppressWarnings("unchecked")
   @Override
   public void initialize(UimaContext context) throws ResourceInitializationException {
     super.initialize(context);
+    // read parameters
     String classifierModelRootString = Objects.firstNonNull(
             System.getProperty(MODEL_ROOT_PROPERTY),
             (String) context.getConfigParameterValue("model-root"));
@@ -101,8 +110,12 @@ public class AbstractTrainerPredictor extends AbstractLoggedComponent {
       backgroundNegative = Boolean.parseBoolean(System.getProperty(BACKGROUND_NEGATIVE_PROPERTY));
     }
     backgroundNegative = (Boolean) context.getConfigParameterValue("background-negative");
+    gsRelevance = GsRelevance.valueOf(Objects.firstNonNull(
+            System.getProperty(GS_RELEVANCE_PROPERTY),
+            (String) context.getConfigParameterValue("gs-relevance")));
+    // locate model dir
     classifierModelDir = new File(classifierModelRootString, clazz.getSimpleName() + "-"
-            + propString + "-" + backgroundNegative);
+            + propString + "-" + gsRelevance + "-" + backgroundNegative);
     if (!classifierModelDir.exists()) {
       classifierModelDir.mkdir();
     }

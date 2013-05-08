@@ -1,0 +1,6 @@
+class: edu.cmu.cs.ziy.courses.expir.treckba.rescale.ThresholdTrainer
+gs-relevance: RELEVANT
+dir: threshold
+
+persistence-provider: |
+  inherit: ecd.default-log-persistence-provider

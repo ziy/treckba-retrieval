@@ -14,49 +14,49 @@ import edu.cmu.lti.oaqa.framework.data.RetrievalResult;
 
 public class ConstantRescaler extends AbstractRescaler {
 
-  private static final String LOWERBOUND_PROPERTY = "treckba-retrieval.rescale.lowerbound";
+  private static final String X_MIN_PROPERTY = "treckba-retrieval.rescale.x-min";
 
-  private static final String UPPERBOUND_PROPERTY = "treckba-retrieval.rescale.upperbound";
+  private static final String X_MAX_PROPERTY = "treckba-retrieval.rescale.x-max";
 
-  private static final String MIN_PROPERTY = "treckba-retrieval.rescale.min";
+  private static final String Y_MIN_PROPERTY = "treckba-retrieval.rescale.y-min";
 
-  private static final String MAX_PROPERTY = "treckba-retrieval.rescale.max";
+  private static final String Y_MAX_PROPERTY = "treckba-retrieval.rescale.y-max";
 
-  private float lowerbound;
+  private float xMin;
 
-  private float upperbound;
+  private float xMax;
 
-  private float min;
+  private float yMin;
 
-  private float max;
+  private float yMax;
 
   private float rescale;
 
   @Override
   public void initialize(UimaContext context) throws ResourceInitializationException {
     super.initialize(context);
-    lowerbound = Objects.firstNonNull(
-            Floats.tryParse(Strings.nullToEmpty(System.getProperty(LOWERBOUND_PROPERTY))),
-            (Float) context.getConfigParameterValue("lowerbound"));
-    upperbound = Objects.firstNonNull(
-            Floats.tryParse(Strings.nullToEmpty(System.getProperty(UPPERBOUND_PROPERTY))),
-            (Float) context.getConfigParameterValue("upperbound"));
-    min = Objects.firstNonNull(
-            Floats.tryParse(Strings.nullToEmpty(System.getProperty(MIN_PROPERTY))),
-            (Float) context.getConfigParameterValue("min"));
-    max = Objects.firstNonNull(
-            Floats.tryParse(Strings.nullToEmpty(System.getProperty(MAX_PROPERTY))),
-            (Float) context.getConfigParameterValue("max"));
-    rescale = (max - min) / (upperbound - lowerbound);
-    log("RESCALE: " + rescale + ", LOWERBOUND: " + lowerbound + ", UPPERBOUND: " + upperbound
-            + ", MIN: " + min + ", MAX: " + max);
+    xMin = Objects.firstNonNull(
+            Floats.tryParse(Strings.nullToEmpty(System.getProperty(X_MIN_PROPERTY))),
+            (Float) context.getConfigParameterValue("x-min"));
+    xMax = Objects.firstNonNull(
+            Floats.tryParse(Strings.nullToEmpty(System.getProperty(X_MAX_PROPERTY))),
+            (Float) context.getConfigParameterValue("x-max"));
+    yMin = Objects.firstNonNull(
+            Floats.tryParse(Strings.nullToEmpty(System.getProperty(Y_MIN_PROPERTY))),
+            (Float) context.getConfigParameterValue("y-min"));
+    yMax = Objects.firstNonNull(
+            Floats.tryParse(Strings.nullToEmpty(System.getProperty(Y_MAX_PROPERTY))),
+            (Float) context.getConfigParameterValue("y-max"));
+    rescale = (yMax - yMin) / (xMax - xMin);
+    log("RESCALE: " + rescale + ", x-min: " + xMin + ", x-max: " + xMax + ", y-min: " + yMin
+            + ", y-max: " + yMax);
   }
 
   @Override
   protected List<RetrievalResult> rescale(List<RetrievalResult> documents) {
     List<RetrievalResult> newDocuments = Lists.newArrayList();
     for (RetrievalResult document : documents) {
-      float score = bound((document.getProbability() - lowerbound) * rescale + min, min, max);
+      float score = bound((document.getProbability() - xMin) * rescale + yMin, yMin, yMax);
       newDocuments.add(new RetrievalResult(document.getDocID(), score, document.getQueryString()));
     }
     return newDocuments;

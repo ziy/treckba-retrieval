@@ -31,8 +31,8 @@ pipeline:
   - inherit: ecd.phase
     name: train-classifier
     options: |
-      - inherit: treckba-retrieval.classify.libsvm-topic-specific-test
       - inherit: treckba-retrieval.classify.libsvm-topic-independent-test
+#      - inherit: treckba-retrieval.classify.libsvm-topic-specific-test
 #      - inherit: treckba-retrieval.classify.random-forest-topic-specific-test
 #      - inherit: treckba-retrieval.classify.random-forest-topic-independent-test
 #      - inherit: treckba-retrieval.classify.logistic-topic-specific-test
@@ -49,6 +49,7 @@ pipeline:
   - inherit: ecd.phase
     name: rescale
     options: |
+      - inherit: treckba-retrieval.rescale.threshold-curve
       - inherit: treckba-retrieval.rescale.constant
 #      - inherit: treckba-retrieval.rescale.minmax
 
